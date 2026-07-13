@@ -315,10 +315,7 @@
             <div class="role-btn" id="roleClientBtn" onclick="setSignupRole('client')">Client</div>
           </div>
         </div>
-        <div class="auth-field hidden" id="trainerEmailField">
-          <label>Your Trainer's Email</label>
-          <input type="email" id="suTrainerEmail" placeholder="your coach's email">
-        </div>
+        
         <button class="auth-submit" id="signupBtn" onclick="doSignup()">Create Account</button>
       </div>
 
@@ -790,7 +787,7 @@ function setSignupRole(role){
   signupRole=role;
   document.getElementById("roleTrainerBtn").classList.toggle("active",role==="trainer");
   document.getElementById("roleClientBtn").classList.toggle("active",role==="client");
-  document.getElementById("trainerEmailField").classList.toggle("hidden",role!=="client");
+
 }
 function hideAuthMsgs(){
   document.getElementById("authError").classList.add("hidden");
@@ -809,11 +806,11 @@ async function doSignup(){
   const name=document.getElementById("suName").value.trim();
   const email=document.getElementById("suEmail").value.trim();
   const password=document.getElementById("suPassword").value;
-  const trainerEmail=document.getElementById("suTrainerEmail").value.trim();
+  
 
   if(!name||!email||!password){ showAuthError("Fill in all fields"); return; }
   if(password.length<6){ showAuthError("Password must be at least 6 characters"); return; }
-  if(signupRole==="client" && !trainerEmail){ showAuthError("Enter your trainer's email"); return; }
+  
 
   const btn=document.getElementById("signupBtn"); btn.disabled=true; btn.textContent="Creating account...";
 
@@ -829,15 +826,6 @@ async function doSignup(){
     btn.disabled=false; btn.textContent="Create Account"; return;
   }
 
-  // If client, link to trainer by looking up trainer's profile via email
-  if(signupRole==="client" && data.user){
-    // small delay to let the profile-creation trigger run
-    await new Promise(r=>setTimeout(r,800));
-    const {data:trainerAuth}=await sb.rpc("get_user_id_by_email",{p_email:trainerEmail}).catch(()=>({data:null}));
-    if(trainerAuth){
-      await sb.from("profiles").update({trainer_id:trainerAuth}).eq("id",data.user.id);
-    }
-  }
 
   btn.disabled=false; btn.textContent="Create Account";
 
