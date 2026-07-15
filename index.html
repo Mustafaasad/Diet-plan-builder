@@ -284,6 +284,8 @@
 </head>
 <body>
 
+<datalist id="foodDatalist"></datalist>
+
 <!-- ============ AUTH SCREEN ============ -->
 <div id="authView">
   <div class="auth-wrap">
@@ -1001,6 +1003,13 @@ function foodOptions(sel){
     html+=`<option ${f.name===sel?"selected":""}>${f.name}</option>`; });
   return html+"</optgroup>";
 }
+function fillFoodDatalist(){
+  const dl=document.getElementById("foodDatalist");
+  if(dl && !dl.dataset.filled){
+    dl.innerHTML=FOODS.map(f=>`<option value="${esc(f.name)}">`).join("");
+    dl.dataset.filled="1";
+  }
+}
 
 /* ====================== LIBRARY ====================== */
 async function renderLibrary(){
@@ -1131,13 +1140,15 @@ function renderProgress(){
   }).join("");
 }
 function renderMeals(){
+  fillFoodDatalist();
   document.getElementById("meals").innerHTML = plan.meals.map((m,mi)=>{
     const rows=m.items.map((it,ri)=>{ const f=byName[it.food], mac=rowMacros(it), unit=f?f.unit:"";
       return `<div class="frow">
-        <select onchange="setFood(${mi},${ri},this.value)">${foodOptions(it.food)}</select>
+        <input list="foodDatalist" placeholder="Search food..." value="${esc(it.food)}"
+          oninput="setFood(${mi},${ri},this.value)">
         <div class="qtywrap">
           <input type="number" inputmode="decimal" min="0" placeholder="qty" value="${it.qty}" oninput="setQty(${mi},${ri},this.value)">
-          <span class="unit">${unit||''}</span>
+          <span class="unit" id="unit-${mi}-${ri}">${unit||''}</span>
         </div>
         <div class="mac" id="mac-${mi}-${ri}"><b>${r0(mac[3])}</b> kcal<br>${r1(mac[0])}p·${r1(mac[1])}c·${r1(mac[2])}f</div>
         <button class="rmrow" onclick="rmRow(${mi},${ri})">×</button></div>`;
@@ -1157,7 +1168,18 @@ function renderMeals(){
 function markDirty(){ dirty=true; plan.client=document.getElementById("client").value; plan.goal=document.getElementById("goal").value; }
 function setTarget(i,v){ plan.targets[i]=parseFloat(v)||0; dirty=true; renderProgress(); }
 function setMealName(mi,v){ plan.meals[mi].name=v; dirty=true; }
-function setFood(mi,ri,v){ plan.meals[mi].items[ri].food=v; dirty=true; renderMeals(); renderProgress(); }
+function setFood(mi,ri,v){
+  plan.meals[mi].items[ri].food=v; dirty=true;
+  const f=byName[v], mac=rowMacros(plan.meals[mi].items[ri]);
+  const macEl=document.getElementById(`mac-${mi}-${ri}`);
+  if(macEl) macEl.innerHTML=`<b>${r0(mac[3])}</b> kcal<br>${r1(mac[0])}p·${r1(mac[1])}c·${r1(mac[2])}f`;
+  const unitSpan=document.getElementById(`unit-${mi}-${ri}`);
+  if(unitSpan) unitSpan.textContent=f?f.unit:"";
+  const t=mealTotals(plan.meals[mi]);
+  const sub=document.getElementById(`sub-${mi}`);
+  if(sub) sub.innerHTML=`<span>${r1(t[0])}P</span><span>${r1(t[1])}C</span><span>${r1(t[2])}F</span><span>${r0(t[3])} kcal</span>`;
+  renderProgress();
+}
 function setQty(mi,ri,v){
   plan.meals[mi].items[ri].qty=v; dirty=true;
   const mac=rowMacros(plan.meals[mi].items[ri]);
