@@ -136,6 +136,53 @@
     font-size:12.5px;font-weight:600}
   .signout-btn{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:9px;padding:7px 12px;
     font-size:12px;font-weight:600;cursor:pointer}
+  /* ONBOARDING QUESTIONNAIRE */
+  .ob-wrap{max-width:480px;margin:0 auto;padding:24px 16px 60px}
+  .ob-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 20px}
+  .ob-head{text-align:center;margin-bottom:18px}
+  .ob-head .brand{justify-content:center;font-size:18px}
+  .ob-head p{font-size:12.5px;color:#7e9197;margin-top:6px}
+  .ob-section{margin-top:18px}
+  .ob-section:first-of-type{margin-top:0}
+  .ob-section label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--teal-2);font-weight:700;margin-bottom:6px}
+  .ob-section input,.ob-section select,.ob-section textarea{width:100%;padding:11px;border-radius:10px;
+    border:1px solid var(--line);font-size:15px;background:#fff;font-family:inherit}
+  .ob-section textarea{min-height:60px;resize:vertical}
+  .ob-twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ob-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .ob-chip{border:1.5px solid var(--line);background:#fff;color:#7e9197;padding:8px 13px;border-radius:20px;
+    font-size:12.5px;font-weight:600;cursor:pointer}
+  .ob-chip.active{border-color:var(--teal);background:var(--teal);color:#fff}
+  .ob-submit{width:100%;margin-top:22px;background:var(--amber);color:#fff;border:none;padding:14px;
+    border-radius:12px;font-weight:700;font-size:15px;cursor:pointer}
+  .ob-submit:disabled{opacity:.5;cursor:not-allowed}
+  .ob-req{color:#c0492f;margin-left:2px}
+  /* CLIENT ROSTER / PROFILE (trainer view) */
+  .client-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 14px;
+    margin-top:11px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+  .client-card:active{background:#f0f6f7}
+  .client-card .badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px}
+  .badge-done{background:#e5f5ed;color:#1e7a45}
+  .badge-pending{background:var(--amber-soft);color:var(--amber-ink)}
+  .ob-summary-row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--mist)}
+  .ob-summary-row:last-of-type{border-bottom:none}
+  .ob-summary-row .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--teal-2);font-weight:700;flex:none;width:130px}
+  .ob-summary-row .val{font-size:14px;text-align:right;flex:1}
+  .trainer-pick-card{border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;margin-top:10px;
+    cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+  .trainer-pick-card:active{background:var(--mist)}
+  .trainer-pick-card .who{font-weight:700;font-size:15px}
+  .fb-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--mist)}
+  .fb-row:last-of-type{border-bottom:none}
+  .fb-row .lbl{font-size:14px;font-weight:600}
+  .fb-row .lbl .locked{font-size:10px;color:#90a3a8;font-weight:600;margin-left:6px;text-transform:uppercase}
+  .fb-toggle{width:46px;height:26px;border-radius:20px;border:none;background:var(--line);position:relative;cursor:pointer;flex:none}
+  .fb-toggle.on{background:var(--good)}
+  .fb-toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+    background:#fff;transition:left .15s}
+  .fb-toggle.on::after{left:23px}
+  .fb-toggle:disabled{opacity:.5;cursor:not-allowed}
   /* CLIENT VIEW */
   .client-plan-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;
     margin-top:11px;cursor:pointer}
@@ -167,6 +214,14 @@
   .wtab{flex:none;padding:7px 12px;border-radius:20px;border:1.5px solid var(--line);
     background:#fff;font-size:13px;font-weight:700;color:#7e9197;cursor:pointer}
   .wtab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .slot-tabs{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap;align-items:center}
+  .slot-tab-wrap{display:flex;align-items:center;gap:4px}
+  .slot-tab{padding:8px 14px;border-radius:20px;border:1.5px solid var(--line);background:#fff;
+    font-size:13px;font-weight:700;color:#7e9197;cursor:pointer}
+  .slot-tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .slot-tab.empty{border-style:dashed;color:var(--teal-2)}
+  .slot-change{background:var(--mist);border:none;border-radius:8px;width:28px;height:28px;
+    font-size:13px;cursor:pointer;color:var(--teal-2);flex:none}
   .day-card{background:var(--white);border:1px solid var(--line);border-radius:13px;margin-top:11px;overflow:hidden}
   .day-head{background:var(--teal);color:#fff;padding:9px 13px;font-weight:700;font-size:14px}
   .ex-row-rm{padding:10px 12px;border-bottom:1px solid var(--mist)}
@@ -285,6 +340,7 @@
 <body>
 
 <datalist id="foodDatalist"></datalist>
+<datalist id="exerciseDatalist"></datalist>
 
 <!-- ============ AUTH SCREEN ============ -->
 <div id="authView">
@@ -327,6 +383,37 @@
   </div>
 </div>
 
+<!-- ============ CLIENT ONBOARDING (forced, right after signup) ============ -->
+<!-- ============ CHOOSE TRAINER (first, right after client signup) ============ -->
+<div id="chooseTrainerView" class="hidden">
+  <div class="ob-wrap">
+    <div class="ob-card">
+      <div class="ob-head">
+        <div class="brand"><span class="dot"></span> COACH MUSTAFA</div>
+        <p>Are you training with a coach, or using the app on your own?</p>
+      </div>
+      <div id="trainerPickList"></div>
+      <button class="ob-submit" style="background:var(--teal);margin-top:16px" onclick="skipTrainerChoice()">I'll use the app on my own</button>
+    </div>
+  </div>
+</div>
+
+<div id="onboardingView" class="hidden">
+  <div class="ob-wrap">
+    <div class="ob-card">
+      <div class="ob-head">
+        <div class="brand"><span class="dot"></span> COACH MUSTAFA</div>
+        <p>A few quick questions so your coach can build the right plan for you.</p>
+      </div>
+
+      <div id="obFields"></div>
+
+      <div id="obError" class="auth-error hidden"></div>
+      <button class="ob-submit" id="obSubmitBtn" onclick="submitOnboarding()">Finish Setup</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap hidden" id="appWrap">
 
   <!-- ============ CLIENT HOME ============ -->
@@ -359,6 +446,55 @@
         <div class="label">Workout Plan</div>
         <div class="sub">Exercises · Sets · PDF</div>
       </div>
+      <div class="tool-card" onclick="openClients()">
+        <div class="icon">👤</div>
+        <div class="label">Clients</div>
+        <div class="sub">Onboarding info</div>
+      </div>
+      <div class="tool-card" onclick="openFormBuilder()">
+        <div class="icon">📝</div>
+        <div class="label">Onboarding Form</div>
+        <div class="sub">Choose what to ask</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ONBOARDING FORM BUILDER (trainer) ============ -->
+  <div id="formBuilderView" class="hidden">
+    <div class="topbar">
+      <button class="ghost" onclick="gotoHome()">‹ Home</button>
+      <div class="brand" style="font-size:15px"><span class="dot"></span> Onboarding Form</div>
+    </div>
+    <div class="panel" style="margin-top:13px">
+      <h2>Questions your new clients see</h2>
+      <div class="tip" style="margin-top:-4px;margin-bottom:8px">Age and Goal are always asked. Toggle the rest on or off — this applies to every new client who picks you as their trainer.</div>
+      <div id="fbList"></div>
+    </div>
+    <div class="actionbar" id="fbActionbar">
+      <button class="btn-save" onclick="saveFormBuilder()">Save</button>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+
+  <!-- ============ CLIENTS ROSTER (trainer) ============ -->
+  <div id="clientsListView" class="hidden">
+    <div class="topbar">
+      <button class="ghost" onclick="gotoHome()">‹ Home</button>
+      <div class="brand" style="font-size:15px"><span class="dot"></span> Clients</div>
+    </div>
+    <h2 style="margin-top:18px">Your clients</h2>
+    <div id="clientsList"></div>
+  </div>
+
+  <!-- ============ CLIENT PROFILE (read-only, trainer) ============ -->
+  <div id="clientProfileView" class="hidden">
+    <div class="topbar">
+      <button class="ghost" onclick="backToClientsList()">‹ Clients</button>
+      <div class="brand" style="font-size:15px" id="clientProfileTitle"><span class="dot"></span> Client</div>
+    </div>
+    <div class="panel" style="margin-top:13px">
+      <h2>Onboarding info</h2>
+      <div id="clientProfileBody"></div>
     </div>
   </div>
 
@@ -427,7 +563,22 @@
           <div class="label">Custom Plan</div>
           <div class="sub">Build your own from scratch</div>
         </div>
+        <div class="wo-choice-card" onclick="openWoAll()">
+          <div class="icon">🗂️</div>
+          <div class="label">Saved Plans</div>
+          <div class="sub">All plans, mixed, by date</div>
+        </div>
       </div>
+    </div>
+
+    <!-- ===== SAVED PLANS (combined) SECTION ===== -->
+    <div id="woAllSection" class="hidden">
+      <div class="topbar">
+        <button class="ghost" onclick="backToWoHome()">‹ Workout</button>
+        <div class="brand" style="font-size:15px"><span class="dot"></span> Saved Plans</div>
+      </div>
+      <h2 style="margin-top:18px">All workout plans</h2>
+      <div id="woAllList"></div>
     </div>
 
     <!-- ===== READY MADE SECTION ===== -->
@@ -490,6 +641,7 @@
           <button class="ghost" onclick="rmPlanBack()">‹ Plans</button>
           <div class="brand" style="font-size:14px" id="rmPlanTitle"><span class="dot"></span> Plan</div>
         </div>
+        <div class="slot-tabs" id="rmSlotTabs"></div>
         <div class="injury-box" id="rmViewInjury" style="display:none;margin-top:13px"></div>
         <div class="panel" style="margin-top:13px">
           <h2>Select week</h2>
@@ -736,6 +888,48 @@ const FOODS = FOODS_RAW.map(f=>({
 const byName = Object.fromEntries(FOODS.map(f=>[f.name,f]));
 const MACROS=["Protein","Carbs","Fats","Calories"], MKEY=["p","c","fat","cal"], MUNIT=["g","g","g",""];
 
+/* ====================== EXERCISE DATABASE (~90 exercises, 9 categories) ====================== */
+const EXERCISES_RAW = [
+// Chest
+["Barbell Bench Press","Chest"],["Incline Barbell Bench Press","Chest"],["Decline Bench Press","Chest"],
+["Dumbbell Bench Press","Chest"],["Incline Dumbbell Press","Chest"],["Dumbbell Flyes","Chest"],
+["Cable Crossover","Chest"],["Pec Deck Machine","Chest"],["Push-Ups","Chest"],
+["Dips (Chest)","Chest"],["Landmine Press","Chest"],["Machine Chest Press","Chest"],
+// Back
+["Deadlift","Back"],["Barbell Row","Back"],["Pendlay Row","Back"],["T-Bar Row","Back"],
+["Seated Cable Row","Back"],["Lat Pulldown","Back"],["Pull-Ups","Back"],["Chin-Ups","Back"],
+["Single-Arm Dumbbell Row","Back"],["Face Pull","Back"],["Rack Pulls","Back"],["Straight Arm Pulldown","Back"],
+// Shoulders
+["Overhead Press","Shoulders"],["Seated Dumbbell Press","Shoulders"],["Arnold Press","Shoulders"],
+["Lateral Raise","Shoulders"],["Front Raise","Shoulders"],["Rear Delt Fly","Shoulders"],
+["Cable Lateral Raise","Shoulders"],["Upright Row","Shoulders"],["Shrugs","Shoulders"],
+["Machine Shoulder Press","Shoulders"],["Reverse Pec Deck","Shoulders"],
+// Legs
+["Back Squat","Legs"],["Front Squat","Legs"],["Leg Press","Legs"],["Romanian Deadlift","Legs"],
+["Leg Curl","Legs"],["Leg Extension","Legs"],["Walking Lunges","Legs"],["Bulgarian Split Squat","Legs"],
+["Hack Squat","Legs"],["Goblet Squat","Legs"],["Calf Raise (Standing)","Legs"],["Calf Raise (Seated)","Legs"],
+// Biceps
+["Barbell Curl","Biceps"],["Dumbbell Curl","Biceps"],["Hammer Curl","Biceps"],["Preacher Curl","Biceps"],
+["Cable Curl","Biceps"],["Concentration Curl","Biceps"],["Incline Dumbbell Curl","Biceps"],
+// Triceps
+["Triceps Pushdown","Triceps"],["Skull Crushers","Triceps"],["Overhead Triceps Extension","Triceps"],
+["Close-Grip Bench Press","Triceps"],["Dips (Triceps)","Triceps"],["Cable Kickback","Triceps"],["Rope Pushdown","Triceps"],
+// Core
+["Plank","Core"],["Cable Crunch","Core"],["Hanging Leg Raise","Core"],["Ab Wheel Rollout","Core"],
+["Russian Twist","Core"],["Bicycle Crunch","Core"],["Sit-Ups","Core"],["Side Plank","Core"],
+["Mountain Climbers","Core"],["Decline Sit-Ups","Core"],
+// Glutes
+["Hip Thrust","Glutes"],["Glute Bridge","Glutes"],["Cable Pull-Through","Glutes"],["Glute Kickback","Glutes"],
+["Sumo Deadlift","Glutes"],["Step-Ups","Glutes"],["Curtsy Lunge","Glutes"],["Abduction Machine","Glutes"],
+// Cardio / Full Body
+["Treadmill Run","Cardio/Full Body"],["Rowing Machine","Cardio/Full Body"],["Stationary Bike","Cardio/Full Body"],
+["Battle Ropes","Cardio/Full Body"],["Burpees","Cardio/Full Body"],["Jump Rope","Cardio/Full Body"],
+["Kettlebell Swing","Cardio/Full Body"],["Box Jump","Cardio/Full Body"],["Sled Push","Cardio/Full Body"],
+];
+const EX_CAT_ORDER=["Chest","Back","Shoulders","Legs","Biceps","Triceps","Core","Glutes","Cardio/Full Body"];
+const EXERCISES = EXERCISES_RAW.map(e=>({name:e[0],cat:e[1]}))
+  .sort((a,b)=> EX_CAT_ORDER.indexOf(a.cat)-EX_CAT_ORDER.indexOf(b.cat) || a.name.localeCompare(b.name));
+
 /* ====================== STORAGE (SUPABASE) ====================== */
 const PREFIX_TO_KIND = { "plan:":"diet", "rmplan:":"ready_made_workout", "wplan:":"custom_workout" };
 
@@ -861,7 +1055,10 @@ async function doSignOut(){
 
 async function resetAuthUI(){
   currentUser=null; currentProfile=null;
+  rmSlots=[null,null]; rmActiveSlot=0;
   document.getElementById("appWrap").classList.add("hidden");
+  document.getElementById("onboardingView").classList.add("hidden");
+  document.getElementById("chooseTrainerView").classList.add("hidden");
   document.getElementById("authView").classList.remove("hidden");
   document.getElementById("loginEmail").value="";
   document.getElementById("loginPassword").value="";
@@ -872,6 +1069,8 @@ async function checkSession(){
   const {data:{session}}=await sb.auth.getSession();
   if(!session){
     document.getElementById("authView").classList.remove("hidden");
+    document.getElementById("chooseTrainerView").classList.add("hidden");
+    document.getElementById("onboardingView").classList.add("hidden");
     document.getElementById("appWrap").classList.add("hidden");
     return;
   }
@@ -881,6 +1080,22 @@ async function checkSession(){
   currentProfile=profile;
 
   document.getElementById("authView").classList.add("hidden");
+
+  if(profile.role==="client" && !profile.onboarding_completed){
+    document.getElementById("appWrap").classList.add("hidden");
+    if(!profile.trainer_id){
+      document.getElementById("onboardingView").classList.add("hidden");
+      document.getElementById("chooseTrainerView").classList.remove("hidden");
+      renderTrainerPickList();
+    } else {
+      document.getElementById("chooseTrainerView").classList.add("hidden");
+      document.getElementById("onboardingView").classList.remove("hidden");
+      await startOnboardingForm();
+    }
+    return;
+  }
+  document.getElementById("chooseTrainerView").classList.add("hidden");
+  document.getElementById("onboardingView").classList.add("hidden");
   document.getElementById("appWrap").classList.remove("hidden");
 
   if(profile.role==="client"){
@@ -894,6 +1109,160 @@ async function checkSession(){
     document.getElementById("clientHomeView").classList.add("hidden");
     gotoHome();
   }
+}
+
+/* ====================== CHOOSE TRAINER (client, right after signup) ====================== */
+async function renderTrainerPickList(){
+  const el=document.getElementById("trainerPickList");
+  el.innerHTML='<div class="empty">Loading trainers...</div>';
+  try{
+    const {data:trainers,error}=await sb.from("profiles").select("id,full_name").eq("role","trainer");
+    if(error) throw error;
+    if(!trainers||!trainers.length){ el.innerHTML='<div class="empty">No trainers available yet.</div>'; return; }
+    el.innerHTML=trainers.map(t=>`
+      <div class="trainer-pick-card" onclick="pickTrainer('${t.id}')">
+        <div class="who">${esc(t.full_name)||"Trainer"}</div>
+        <span style="font-size:20px;color:#7e9197">›</span>
+      </div>`).join("");
+  }catch(e){
+    console.error("renderTrainerPickList failed:",e);
+    el.innerHTML='<div class="empty">Couldn\'t load trainers. Try again.</div>';
+  }
+}
+async function pickTrainer(trainerId){
+  const {error}=await sb.from("profiles").update({trainer_id:trainerId}).eq("id",currentUser.id);
+  if(error){ console.error(error); return; }
+  currentProfile.trainer_id=trainerId;
+  checkSession();
+}
+async function skipTrainerChoice(){
+  // no trainer chosen — go straight to the full default questionnaire
+  document.getElementById("chooseTrainerView").classList.add("hidden");
+  document.getElementById("onboardingView").classList.remove("hidden");
+  await startOnboardingForm();
+}
+
+/* ====================== CLIENT ONBOARDING QUESTIONNAIRE (trainer-configurable, forced after signup) ====================== */
+const OB_EQUIPMENT=["Dumbbells","Barbell","Resistance Bands","Mat","Swiss Ball","Cardio Machine","Full Gym Access","Bodyweight Only"];
+const OB_DIET=["Vegetarian","Vegan","Halal","Lactose Intolerant","Gluten Free","Nut Allergy","None"];
+const QUESTION_DEFS=[
+  {key:"age",label:"Age",type:"number",locked:true,min:10,max:100,placeholder:"e.g. 28"},
+  {key:"goal",label:"Goal",type:"select",locked:true,options:["Fat Loss","Muscle Gain","General Fitness","Strength","Endurance","Other"]},
+  {key:"height",label:"Height (cm)",type:"number",min:100,max:230,placeholder:"e.g. 172"},
+  {key:"weight",label:"Weight (kg)",type:"number",min:30,max:250,placeholder:"e.g. 70"},
+  {key:"experience",label:"Experience Level",type:"select",options:["Beginner","Intermediate","Advanced"]},
+  {key:"activity",label:"Activity Level",type:"select",options:["Sedentary (little/no exercise)","Lightly Active (1–3 days/week)","Moderately Active (3–5 days/week)","Very Active (6–7 days/week)"]},
+  {key:"timeAvailable",label:"Time Available Per Session",type:"select",options:["Under 30 min","30–45 min","45–60 min","60+ min"]},
+  {key:"equipment",label:"Equipment Available",type:"chips",options:OB_EQUIPMENT},
+  {key:"dietaryRestrictions",label:"Dietary Restrictions",type:"chips",options:OB_DIET},
+  {key:"injury",label:"Injuries / Limitations",type:"textarea",placeholder:"Note any injuries, pain, or movements to avoid..."},
+  {key:"extra",label:"Anything Else Your Coach Should Know",type:"textarea",placeholder:"Anything we didn't ask that you think matters — schedule, past experience, preferences, concerns..."}
+];
+const LOCKED_KEYS=QUESTION_DEFS.filter(q=>q.locked).map(q=>q.key);
+let obChipState={};
+let obEnabledKeys=QUESTION_DEFS.map(q=>q.key);
+
+async function startOnboardingForm(){
+  // pull the client's trainer's custom question set, fall back to everything
+  obEnabledKeys=QUESTION_DEFS.map(q=>q.key);
+  if(currentProfile.trainer_id){
+    try{
+      const {data:t,error}=await sb.from("profiles").select("trainer_form").eq("id",currentProfile.trainer_id).single();
+      if(!error && t && Array.isArray(t.trainer_form) && t.trainer_form.length){
+        obEnabledKeys=Array.from(new Set([...t.trainer_form,...LOCKED_KEYS]));
+      }
+    }catch(e){ console.error("Couldn't load trainer's form, using default:",e); }
+  }
+  renderOnboardingForm();
+}
+
+function renderOnboardingForm(){
+  obChipState={};
+  document.getElementById("obError").classList.add("hidden");
+  const fields=QUESTION_DEFS.filter(q=>obEnabledKeys.includes(q.key));
+  document.getElementById("obFields").innerHTML=fields.map(q=>{
+    const req=q.locked?'<span class="ob-req">*</span>':"";
+    if(q.type==="number") return `<div class="ob-section"><label>${q.label}${req}</label>
+      <input type="number" id="ob_${q.key}" min="${q.min}" max="${q.max}" placeholder="${q.placeholder||""}"></div>`;
+    if(q.type==="select") return `<div class="ob-section"><label>${q.label}${req}</label>
+      <select id="ob_${q.key}"><option value="">Select…</option>${q.options.map(o=>`<option>${o}</option>`).join("")}</select></div>`;
+    if(q.type==="textarea") return `<div class="ob-section"><label>${q.label}${req}</label>
+      <textarea id="ob_${q.key}" placeholder="${q.placeholder||""}"></textarea></div>`;
+    if(q.type==="chips"){
+      obChipState[q.key]=new Set();
+      return `<div class="ob-section"><label>${q.label}${req}</label>
+        <div class="ob-chips" id="ob_${q.key}">${q.options.map(o=>
+          `<button type="button" class="ob-chip" onclick="obToggleChip('${q.key}','${o}',this)">${o}</button>`).join("")}</div></div>`;
+    }
+    return "";
+  }).join("");
+}
+function obToggleChip(key,val,btn){
+  const set=obChipState[key];
+  if(set.has(val)){ set.delete(val); btn.classList.remove("active"); }
+  else { set.add(val); btn.classList.add("active"); }
+}
+async function submitOnboarding(){
+  const errEl=document.getElementById("obError");
+  const ageEl=document.getElementById("ob_age"), goalEl=document.getElementById("ob_goal");
+  const age=ageEl?(parseInt(ageEl.value)||0):0;
+  const goal=goalEl?goalEl.value:"";
+  if(!age||age<10||age>100){ errEl.textContent="Enter a valid age"; errEl.classList.remove("hidden"); return; }
+  if(!goal){ errEl.textContent="Select a goal"; errEl.classList.remove("hidden"); return; }
+  errEl.classList.add("hidden");
+
+  const data={submittedAt:Date.now()};
+  QUESTION_DEFS.filter(q=>obEnabledKeys.includes(q.key)).forEach(q=>{
+    if(q.type==="chips"){ data[q.key]=Array.from(obChipState[q.key]||[]); return; }
+    const el=document.getElementById(`ob_${q.key}`);
+    if(!el) return;
+    if(q.type==="number") data[q.key]=el.value?parseInt(el.value):null;
+    else data[q.key]=el.value.trim?el.value.trim()||null:el.value||null;
+  });
+
+  const btn=document.getElementById("obSubmitBtn"); btn.disabled=true; btn.textContent="Saving...";
+  const {error}=await sb.from("profiles").update({onboarding:data,onboarding_completed:true}).eq("id",currentUser.id);
+  btn.disabled=false; btn.textContent="Finish Setup";
+  if(error){ console.error(error); errEl.textContent="Couldn't save — try again."; errEl.classList.remove("hidden"); return; }
+
+  currentProfile.onboarding=data; currentProfile.onboarding_completed=true;
+  checkSession();
+}
+
+/* ====================== ONBOARDING FORM BUILDER (trainer customizes their own question set) ====================== */
+let fbEnabled=new Set();
+function openFormBuilder(){
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("dietApp").classList.add("hidden");
+  document.getElementById("workoutApp").classList.add("hidden");
+  document.getElementById("clientsListView").classList.add("hidden");
+  document.getElementById("clientProfileView").classList.add("hidden");
+  document.getElementById("formBuilderView").classList.remove("hidden");
+  renderFormBuilder();
+  window.scrollTo(0,0);
+}
+function renderFormBuilder(){
+  const saved=Array.isArray(currentProfile.trainer_form)&&currentProfile.trainer_form.length
+    ? currentProfile.trainer_form : QUESTION_DEFS.map(q=>q.key);
+  fbEnabled=new Set([...saved,...LOCKED_KEYS]);
+  document.getElementById("fbList").innerHTML=QUESTION_DEFS.map(q=>{
+    const on=fbEnabled.has(q.key);
+    return `<div class="fb-row">
+      <div class="lbl">${q.label}${q.locked?'<span class="locked">Always on</span>':""}</div>
+      <button class="fb-toggle${on?" on":""}" ${q.locked?"disabled":""} onclick="toggleFbKey('${q.key}',this)"></button>
+    </div>`;
+  }).join("");
+}
+function toggleFbKey(key,btn){
+  if(fbEnabled.has(key)){ fbEnabled.delete(key); btn.classList.remove("on"); }
+  else { fbEnabled.add(key); btn.classList.add("on"); }
+}
+async function saveFormBuilder(){
+  const keys=Array.from(new Set([...fbEnabled,...LOCKED_KEYS]));
+  const {error}=await sb.from("profiles").update({trainer_form:keys}).eq("id",currentUser.id);
+  if(error){ console.error(error); toast("Couldn't save — try again"); return; }
+  currentProfile.trainer_form=keys;
+  toast("Form updated");
 }
 
 /* ====================== CLIENT VIEW ====================== */
@@ -1010,6 +1379,13 @@ function fillFoodDatalist(){
     dl.dataset.filled="1";
   }
 }
+function fillExerciseDatalist(){
+  const dl=document.getElementById("exerciseDatalist");
+  if(dl && !dl.dataset.filled){
+    dl.innerHTML=EXERCISES.map(e=>`<option value="${esc(e.name)}">`).join("");
+    dl.dataset.filled="1";
+  }
+}
 
 /* ====================== LIBRARY ====================== */
 async function renderLibrary(){
@@ -1053,12 +1429,83 @@ function gotoHome(){
   if(isClientMode()){ gotoClientHome(); return; }
   plan=null; dirty=false;
   document.getElementById("clientHomeView").classList.add("hidden");
+  document.getElementById("clientsListView").classList.add("hidden");
+  document.getElementById("clientProfileView").classList.add("hidden");
+  document.getElementById("formBuilderView").classList.add("hidden");
   document.getElementById("homeView").classList.remove("hidden");
   document.getElementById("dietApp").classList.add("hidden");
   document.getElementById("workoutApp").classList.add("hidden");
   document.getElementById("actionbar").classList.add("hidden");
   document.getElementById("wActionbar").classList.add("hidden");
   window.scrollTo(0,0);
+}
+
+/* ====================== CLIENTS ROSTER (trainer-only, read-only onboarding view) ====================== */
+function openClients(){
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("dietApp").classList.add("hidden");
+  document.getElementById("workoutApp").classList.add("hidden");
+  document.getElementById("clientProfileView").classList.add("hidden");
+  document.getElementById("clientsListView").classList.remove("hidden");
+  renderClientsList();
+  window.scrollTo(0,0);
+}
+async function renderClientsList(){
+  const list=document.getElementById("clientsList");
+  list.innerHTML='<div class="empty">Loading...</div>';
+  try{
+    const {data:clients,error}=await sb.from("profiles").select("id,full_name,onboarding_completed")
+      .eq("trainer_id",currentUser.id).eq("role","client");
+    if(error) throw error;
+    if(!clients||!clients.length){ list.innerHTML='<div class="empty">No linked clients yet.<br>Clients link automatically when they sign up with a matching email, or via the client picker when assigning a plan.</div>'; return; }
+    list.innerHTML=clients.map(c=>`
+      <div class="client-card" onclick="openClientProfile('${c.id}')">
+        <div class="who">${esc(c.full_name)||"Unnamed client"}</div>
+        <span class="badge ${c.onboarding_completed?"badge-done":"badge-pending"}">${c.onboarding_completed?"✓ Onboarded":"Pending"}</span>
+      </div>`).join("");
+  }catch(e){
+    console.error("renderClientsList failed:",e);
+    list.innerHTML='<div class="empty">Couldn\'t load clients. Try again.</div>';
+  }
+}
+function backToClientsList(){
+  document.getElementById("clientProfileView").classList.add("hidden");
+  document.getElementById("clientsListView").classList.remove("hidden");
+}
+async function openClientProfile(id){
+  document.getElementById("clientsListView").classList.add("hidden");
+  document.getElementById("clientProfileView").classList.remove("hidden");
+  const body=document.getElementById("clientProfileBody");
+  body.innerHTML='<div class="empty">Loading...</div>';
+  window.scrollTo(0,0);
+  try{
+    const {data:c,error}=await sb.from("profiles").select("full_name,onboarding,onboarding_completed").eq("id",id).single();
+    if(error) throw error;
+    document.getElementById("clientProfileTitle").innerHTML=`<span class="dot"></span> ${esc(c.full_name)||"Client"}`;
+    if(!c.onboarding_completed||!c.onboarding){
+      body.innerHTML='<div class="empty">This client hasn\'t completed onboarding yet.</div>';
+      return;
+    }
+    const o=c.onboarding;
+    const rows=[
+      ["Age",o.age],
+      ["Goal",o.goal],
+      ["Height",o.height?o.height+" cm":null],
+      ["Weight",o.weight?o.weight+" kg":null],
+      ["Experience",o.experience],
+      ["Activity Level",o.activity],
+      ["Time / Session",o.timeAvailable],
+      ["Equipment",(o.equipment||[]).join(", ")],
+      ["Dietary Restrictions",(o.dietaryRestrictions||[]).join(", ")],
+      ["Injuries / Limitations",o.injury],
+      ["Anything Else",o.extra]
+    ].filter(([,v])=>v);
+    body.innerHTML=rows.map(([lbl,val])=>`
+      <div class="ob-summary-row"><div class="lbl">${lbl}</div><div class="val">${esc(String(val))}</div></div>`).join("");
+  }catch(e){
+    console.error("openClientProfile failed:",e);
+    body.innerHTML='<div class="empty">Couldn\'t load this client. Try again.</div>';
+  }
 }
 function openDiet(){ 
   document.getElementById("homeView").classList.add("hidden");
@@ -1074,6 +1521,7 @@ function openWorkout(){
 }
 function woShowHome(){
   document.getElementById("woHome").classList.remove("hidden");
+  document.getElementById("woAllSection").classList.add("hidden");
   document.getElementById("rmSection").classList.add("hidden");
   document.getElementById("customSection").classList.add("hidden");
   document.getElementById("wActionbar").classList.add("hidden");
@@ -1084,15 +1532,92 @@ function woShowHome(){
 function backToWoHome(){ woShowHome(); }
 function openReadyMade(){
   document.getElementById("woHome").classList.add("hidden");
+  document.getElementById("woAllSection").classList.add("hidden");
   document.getElementById("rmSection").classList.remove("hidden");
   document.getElementById("customSection").classList.add("hidden");
   rmRenderLibrary(); rmShow("lib");
 }
 function openCustom(){
   document.getElementById("woHome").classList.add("hidden");
+  document.getElementById("woAllSection").classList.add("hidden");
   document.getElementById("rmSection").classList.add("hidden");
   document.getElementById("customSection").classList.remove("hidden");
   wRenderLibrary(); wShow("lib");
+}
+
+/* ====================== SAVED PLANS — combined Ready Made + Custom, sorted by date ====================== */
+function openWoAll(){
+  document.getElementById("woHome").classList.add("hidden");
+  document.getElementById("rmSection").classList.add("hidden");
+  document.getElementById("customSection").classList.add("hidden");
+  document.getElementById("woAllSection").classList.remove("hidden");
+  renderWoAllList();
+  window.scrollTo(0,0);
+}
+async function renderWoAllList(){
+  const list=document.getElementById("woAllList");
+  list.innerHTML='<div class="empty">Loading...</div>';
+  try{
+    const [rmPlans,customPlans]=await Promise.all([Store.list(RM_PREFIX),Store.list(W_PREFIX)]);
+    const items=[
+      ...rmPlans.map(p=>({...p,_kind:"rm"})),
+      ...customPlans.map(p=>({...p,_kind:"custom"}))
+    ].sort((a,b)=>(b.updated||0)-(a.updated||0));
+
+    if(!items.length){ list.innerHTML='<div class="empty">No saved plans yet.<br>Create one from Ready Made or Custom.</div>'; return; }
+
+    list.innerHTML=items.map(p=>{
+      const d=new Date(p.updated||Date.now());
+      const date=d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+      if(p._kind==="rm"){
+        return `<div class="plan-card" onclick="woAllOpenPlan('${p.id}','rm')">
+          <div>
+            <span class="kind-tag kind-workout" style="margin-bottom:5px">Ready Made</span>
+            <div class="who">${esc(p.client)||"Untitled"}</div>
+            <div class="meta">${esc(p.templateName)||""} · ${esc(p.templateTag)||""} · ${date}</div>
+          </div>
+          <div style="display:flex;align-items:center;">
+            <button class="del" onclick="event.stopPropagation();woAllDeletePlan('${p.id}','rm')">🗑</button>
+          </div></div>`;
+      }
+      const exCount=(p.exercises||[]).length;
+      return `<div class="plan-card" onclick="woAllOpenPlan('${p.id}','custom')">
+        <div>
+          <span class="kind-tag" style="background:#e8d5f7;color:#6b2fa0;margin-bottom:5px">Custom</span>
+          <div class="who">${esc(p.client)||"Untitled"}</div>
+          <div class="meta">${esc(p.goal)||"—"} · ${exCount} ex · ${date}</div>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <button class="del" onclick="event.stopPropagation();woAllDeletePlan('${p.id}','custom')">🗑</button>
+        </div></div>`;
+    }).join("");
+  }catch(e){
+    console.error("renderWoAllList failed:",e);
+    list.innerHTML='<div class="empty">Couldn\'t load plans. Pull to refresh or try again.</div>';
+  }
+}
+async function woAllOpenPlan(id,kind){
+  document.getElementById("woAllSection").classList.add("hidden");
+  if(kind==="rm"){
+    document.getElementById("customSection").classList.add("hidden");
+    document.getElementById("rmSection").classList.remove("hidden");
+    await rmOpenPlan(id);
+  } else {
+    document.getElementById("rmSection").classList.add("hidden");
+    document.getElementById("customSection").classList.remove("hidden");
+    await wOpenPlan(id);
+  }
+}
+async function woAllDeletePlan(id,kind){
+  if(kind==="rm"){
+    const all=await Store.list(RM_PREFIX);
+    const p=all.find(x=>x.id===id);
+    if(confirm(`Delete ${p&&p.client||"this plan"}? This can't be undone.`)){ await Store.remove(id,RM_PREFIX); renderWoAllList(); }
+  } else {
+    const all=await Store.list(W_PREFIX);
+    const p=all.find(x=>x.id===id);
+    if(confirm(`Delete ${p&&p.client||"this plan"}? This can't be undone.`)){ await Store.remove(id,W_PREFIX); renderWoAllList(); }
+  }
 }
 function show(view){
   document.getElementById("libView").classList.toggle("hidden",view!=="lib");
@@ -1352,6 +1877,7 @@ const RM_TEMPLATES=[
 /* ====================== READY MADE PLAN STATE ====================== */
 const RM_PREFIX="rmplan:";
 let rmPlan=null, rmDirty=false, rmActiveWeek=0, rmActiveTemplate=null;
+let rmSlots=[null,null], rmActiveSlot=0;
 
 function rmBlankPlan(tpl){ return {
   id:"rm"+Date.now()+Math.floor(Math.random()*999),
@@ -1454,6 +1980,7 @@ async function rmSaveAssign(){
   await Store.save(rmPlan,RM_PREFIX);
   rmDirty=false;
   rmActiveWeek=rmPlan.currentWeek||0;
+  rmSlots[rmActiveSlot]=rmPlan;
   rmRenderPlan();
   rmShow("plan");
 }
@@ -1464,8 +1991,40 @@ async function rmOpenPlan(id){
   if(!rmPlan) return;
   rmActiveTemplate=RM_TEMPLATES.find(t=>t.id===rmPlan.templateId)||RM_TEMPLATES[0];
   rmActiveWeek=rmPlan.currentWeek||0;
+  rmSlots[rmActiveSlot]=rmPlan;
   rmRenderPlan();
   rmShow("plan");
+}
+
+/* two-client slot switcher (trainer-only, for running two clients' sessions side by side) */
+function rmRenderSlotTabs(){
+  const el=document.getElementById("rmSlotTabs");
+  if(!el) return;
+  if(isClientMode()){ el.style.display="none"; return; }
+  el.style.display="";
+  el.innerHTML=[0,1].map(i=>{
+    const p=rmSlots[i], active=i===rmActiveSlot?" active":"";
+    if(p){
+      return `<div class="slot-tab-wrap">
+        <button class="slot-tab${active}" onclick="rmSwitchSlot(${i})">${esc(p.client||"Client "+(i+1))}</button>
+        <button class="slot-change" onclick="rmChangeSlot(${i})" title="Load a different client here">⇄</button>
+      </div>`;
+    }
+    return `<button class="slot-tab empty${active}" onclick="rmChangeSlot(${i})">+ Client ${i+1}</button>`;
+  }).join("");
+}
+function rmSwitchSlot(i){
+  if(!rmSlots[i]){ rmChangeSlot(i); return; }
+  rmActiveSlot=i;
+  rmPlan=rmSlots[i];
+  rmActiveTemplate=RM_TEMPLATES.find(t=>t.id===rmPlan.templateId)||RM_TEMPLATES[0];
+  rmActiveWeek=rmPlan.currentWeek||0;
+  rmRenderPlan();
+}
+function rmChangeSlot(i){
+  rmActiveSlot=i;
+  rmRenderLibrary();
+  rmShow("lib");
 }
 function rmPlanBack(){
   if(isClientMode()){ gotoClientHome(); return; }
@@ -1481,6 +2040,7 @@ async function rmDeletePlan(id){
 function rmRenderPlan(){
   const tpl=rmActiveTemplate;
   document.getElementById("rmPlanTitle").innerHTML=`<span class="dot"></span> ${esc(rmPlan.client||"Plan")}`;
+  rmRenderSlotTabs();
   const inj=rmPlan.injury||"";
   const injBox=document.getElementById("rmViewInjury");
   if(inj){ injBox.style.display=""; injBox.innerHTML=`<label>⚠ Injuries / Limitations</label><div style="font-size:13px;color:#7b1717;margin-top:4px">${esc(inj)}</div>`; }
@@ -1494,6 +2054,7 @@ function rmRenderPlan(){
 function rmSelectWeek(wi){ rmActiveWeek=wi; rmPlan.currentWeek=wi; rmDirty=true; rmRenderPlan(); }
 
 function rmRenderDays(){
+  fillExerciseDatalist();
   const tpl=rmActiveTemplate;
   const days=tpl.getDays(rmActiveWeek,rmPlan.rm);
   if(!rmPlan.logs) rmPlan.logs={};
@@ -1666,7 +2227,7 @@ function rmRenderAccRow(key,a,ai,logs){
     <div class="ex-header">
       <div>
         <div class="ex-name">
-          <input value="${esc(a.name)}" placeholder="Exercise name"
+          <input list="exerciseDatalist" value="${esc(a.name)}" placeholder="Search exercise..."
             style="border:none;background:transparent;font-size:14px;font-weight:700;width:100%;padding:0"
             oninput="rmSetAcc('${key}',${ai},'name',this.value)">
         </div>
@@ -1913,19 +2474,24 @@ function wShow(view){
   window.scrollTo(0,0);
 }
 async function wRenderLibrary(){
-  const plans = await Store.list(W_PREFIX);
   const list = document.getElementById("wPlanList");
-  if(!plans.length){ list.innerHTML='<div class="empty">No saved plans yet.<br>Tap "New plan" to make your first one.</div>'; return; }
-  list.innerHTML = plans.map(p=>`
-    <div class="plan-card" onclick="wOpenPlan('${p.id}')">
-      <div>
-        <div class="who">${esc(p.client)||"Untitled"}</div>
-        <div class="meta">${esc(p.goal)||"—"} · ${new Date(p.updated||Date.now()).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</div>
-      </div>
-      <div style="display:flex;align-items:center;">
-        <div class="kcal" style="font-size:12px;color:#7e9197">${p.exercises.length} ex</div>
-        <button class="del" onclick="event.stopPropagation();wDeletePlan('${p.id}')">🗑</button>
-      </div></div>`).join("");
+  try{
+    const plans = await Store.list(W_PREFIX);
+    if(!plans.length){ list.innerHTML='<div class="empty">No saved plans yet.<br>Tap "New plan" to make your first one.</div>'; return; }
+    list.innerHTML = plans.map(p=>`
+      <div class="plan-card" onclick="wOpenPlan('${p.id}')">
+        <div>
+          <div class="who">${esc(p.client)||"Untitled"}</div>
+          <div class="meta">${esc(p.goal)||"—"} · ${new Date(p.updated||Date.now()).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</div>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <div class="kcal" style="font-size:12px;color:#7e9197">${(p.exercises||[]).length} ex</div>
+          <button class="del" onclick="event.stopPropagation();wDeletePlan('${p.id}')">🗑</button>
+        </div></div>`).join("");
+  }catch(e){
+    console.error("wRenderLibrary failed:",e);
+    list.innerHTML='<div class="empty">Couldn\'t load plans. Try again.</div>';
+  }
 }
 function wNewPlan(){ wPlan=wBlankPlan(); wDirty=false; wRenderEditor(); wShow("edit"); }
 async function wOpenPlan(id){ const all=await Store.list(W_PREFIX); wPlan=all.find(p=>p.id===id)||wBlankPlan(); wDirty=false; wRenderEditor(); wShow("edit"); }
@@ -1937,7 +2503,9 @@ async function wDeletePlan(id){
 async function wBackToLibrary(){
   if(isClientMode()){ gotoClientHome(); return; }
   if(wDirty && wPlan){ if(confirm("Save changes before leaving?")) await wSavePlan(true); }
-  wPlan=null; wDirty=false; await wRenderLibrary(); wShow("lib");
+  wPlan=null; wDirty=false;
+  wShow("lib");
+  await wRenderLibrary();
 }
 function wMarkDirty(){ wDirty=true; if(wPlan){ wPlan.client=document.getElementById("wClient").value; wPlan.goal=document.getElementById("wGoal").value; wPlan.injury=document.getElementById("wInjury").value; } }
 
@@ -1948,6 +2516,7 @@ function wRenderEditor(){
   wRenderExercises();
 }
 function wRenderExercises(){
+  fillExerciseDatalist();
   const exs=wPlan.exercises;
   // group consecutive exercises by ssGroup
   const blocks=[];
@@ -1967,7 +2536,7 @@ function wRenderExercises(){
   document.getElementById("wExList").innerHTML=blocks.map(block=>{
     const rows=block.items.map(({ex,i})=>`
       <div class="exrow" style="${block.group?"padding-left:8px":""}">
-        <input placeholder="Exercise name" value="${esc(ex.name)}" oninput="wSetEx(${i},'name',this.value)">
+        <input list="exerciseDatalist" placeholder="Search exercise..." value="${esc(ex.name)}" oninput="wSetEx(${i},'name',this.value)">
         <input type="number" inputmode="numeric" placeholder="Sets" value="${esc(ex.sets)}" oninput="wSetEx(${i},'sets',this.value)" style="text-align:center">
         <input placeholder="Reps" value="${esc(ex.reps)}" oninput="wSetEx(${i},'reps',this.value)" style="text-align:center">
         <input placeholder="Rest" value="${esc(ex.rest)}" oninput="wSetEx(${i},'rest',this.value)" style="text-align:center">
