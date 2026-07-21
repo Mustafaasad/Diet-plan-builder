@@ -390,10 +390,11 @@
     <div class="ob-card">
       <div class="ob-head">
         <div class="brand"><span class="dot"></span> COACH MUSTAFA</div>
-        <p>Are you training with a coach, or using the app on your own?</p>
+        <p id="chooseTrainerPrompt">Are you training with a coach, or using the app on your own?</p>
       </div>
       <div id="trainerPickList"></div>
       <button class="ob-submit" style="background:var(--teal);margin-top:16px" onclick="skipTrainerChoice()">I'll use the app on my own</button>
+      <button class="ob-submit hidden" id="cancelChangeTrainerBtn" style="background:#fff;color:#7e9197;border:1.5px solid var(--line);margin-top:10px" onclick="cancelChangeTrainer()">Cancel</button>
     </div>
   </div>
 </div>
@@ -422,6 +423,7 @@
       <div class="brand" style="font-size:15px"><span class="dot"></span> <span id="clientGreeting">My Plans</span></div>
       <button class="signout-btn" onclick="doSignOut()">Sign Out</button>
     </div>
+    <div id="clientTrainerLine" style="font-size:12.5px;color:#7e9197;margin-top:10px;display:flex;align-items:center;gap:6px"></div>
     <h2 style="margin-top:18px">Your assigned plans</h2>
     <div id="clientPlanList"></div>
   </div>
@@ -1084,6 +1086,9 @@ async function checkSession(){
   if(profile.role==="client" && !profile.onboarding_completed){
     document.getElementById("appWrap").classList.add("hidden");
     if(!profile.trainer_id){
+      trainerChoiceMode="onboarding";
+      document.getElementById("chooseTrainerPrompt").textContent="Are you training with a coach, or using the app on your own?";
+      document.getElementById("cancelChangeTrainerBtn").classList.add("hidden");
       document.getElementById("onboardingView").classList.add("hidden");
       document.getElementById("chooseTrainerView").classList.remove("hidden");
       renderTrainerPickList();
@@ -1104,6 +1109,7 @@ async function checkSession(){
     document.getElementById("workoutApp").classList.add("hidden");
     document.getElementById("clientHomeView").classList.remove("hidden");
     document.getElementById("clientGreeting").textContent=profile.full_name?`Hi, ${profile.full_name}`:"My Plans";
+    renderClientTrainerLine();
     renderClientPlans();
   } else {
     document.getElementById("clientHomeView").classList.add("hidden");
@@ -1111,15 +1117,33 @@ async function checkSession(){
   }
 }
 
-/* ====================== CHOOSE TRAINER (client, right after signup) ====================== */
+async function renderClientTrainerLine(){
+  const el=document.getElementById("clientTrainerLine");
+  if(!el) return;
+  if(!currentProfile.trainer_id){
+    el.innerHTML=`Training on your own · <a href="#" onclick="event.preventDefault();openChangeTrainer()" style="color:var(--teal-2);font-weight:700;text-decoration:none">Pick a trainer</a>`;
+    return;
+  }
+  try{
+    const {data:t}=await sb.from("profiles").select("full_name").eq("id",currentProfile.trainer_id).single();
+    el.innerHTML=`Training with <b>${esc(t?.full_name)||"your trainer"}</b> · <a href="#" onclick="event.preventDefault();openChangeTrainer()" style="color:var(--teal-2);font-weight:700;text-decoration:none">Change</a>`;
+  }catch(e){
+    el.innerHTML="";
+  }
+}
+
+/* ====================== CHOOSE TRAINER (client, right after signup — or later via "Change Trainer") ====================== */
+let trainerChoiceMode="onboarding"; // "onboarding" | "change"
+
 async function renderTrainerPickList(){
   const el=document.getElementById("trainerPickList");
   el.innerHTML='<div class="empty">Loading trainers...</div>';
   try{
     const {data:trainers,error}=await sb.from("profiles").select("id,full_name").eq("role","trainer");
     if(error) throw error;
-    if(!trainers||!trainers.length){ el.innerHTML='<div class="empty">No trainers available yet.</div>'; return; }
-    el.innerHTML=trainers.map(t=>`
+    const others=(trainers||[]).filter(t=>t.id!==currentProfile.trainer_id);
+    if(!others.length){ el.innerHTML='<div class="empty">No trainers available yet.</div>'; return; }
+    el.innerHTML=others.map(t=>`
       <div class="trainer-pick-card" onclick="pickTrainer('${t.id}')">
         <div class="who">${esc(t.full_name)||"Trainer"}</div>
         <span style="font-size:20px;color:#7e9197">›</span>
@@ -1131,16 +1155,48 @@ async function renderTrainerPickList(){
 }
 async function pickTrainer(trainerId){
   const {error}=await sb.from("profiles").update({trainer_id:trainerId}).eq("id",currentUser.id);
-  if(error){ console.error(error); return; }
+  if(error){ console.error(error); toast("Couldn't switch trainer — try again"); return; }
   currentProfile.trainer_id=trainerId;
+  if(trainerChoiceMode==="change"){
+    document.getElementById("chooseTrainerView").classList.add("hidden");
+    document.getElementById("appWrap").classList.remove("hidden");
+    gotoClientHome();
+    toast("Trainer updated");
+    return;
+  }
   checkSession();
 }
 async function skipTrainerChoice(){
+  if(trainerChoiceMode==="change"){
+    const {error}=await sb.from("profiles").update({trainer_id:null}).eq("id",currentUser.id);
+    if(error){ console.error(error); toast("Couldn't update — try again"); return; }
+    currentProfile.trainer_id=null;
+    document.getElementById("chooseTrainerView").classList.add("hidden");
+    document.getElementById("appWrap").classList.remove("hidden");
+    gotoClientHome();
+    toast("Now training on your own");
+    return;
+  }
   // no trainer chosen — go straight to the full default questionnaire
   document.getElementById("chooseTrainerView").classList.add("hidden");
   document.getElementById("onboardingView").classList.remove("hidden");
   await startOnboardingForm();
 }
+function openChangeTrainer(){
+  trainerChoiceMode="change";
+  document.getElementById("chooseTrainerPrompt").textContent="Pick a different trainer, or train on your own.";
+  document.getElementById("cancelChangeTrainerBtn").classList.remove("hidden");
+  document.getElementById("appWrap").classList.add("hidden");
+  document.getElementById("chooseTrainerView").classList.remove("hidden");
+  renderTrainerPickList();
+}
+function cancelChangeTrainer(){
+  trainerChoiceMode="onboarding";
+  document.getElementById("chooseTrainerView").classList.add("hidden");
+  document.getElementById("appWrap").classList.remove("hidden");
+  gotoClientHome();
+}
+
 
 /* ====================== CLIENT ONBOARDING QUESTIONNAIRE (trainer-configurable, forced after signup) ====================== */
 const OB_EQUIPMENT=["Dumbbells","Barbell","Resistance Bands","Mat","Swiss Ball","Cardio Machine","Full Gym Access","Bodyweight Only"];
@@ -1422,6 +1478,7 @@ function gotoClientHome(){
   document.getElementById("rmAssignBar").classList.add("hidden");
   document.getElementById("rmPlanBar").classList.add("hidden");
   document.getElementById("clientHomeView").classList.remove("hidden");
+  renderClientTrainerLine();
   renderClientPlans();
   window.scrollTo(0,0);
 }
