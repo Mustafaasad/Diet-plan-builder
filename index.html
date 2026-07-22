@@ -104,6 +104,7 @@
     <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openProgressView('online',null)">📈 My Progress</button>
     <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openFoodLogView('online',null)">🍽️ Log Food</button>
     <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openPhotoWorkoutView('online',null)">📷 Photo → Workout</button>
+    <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openPhotoFoodView('online',null)">📷 Log Food from Photo</button>
     <h2 style="margin-top:18px">Your assigned plans</h2>
     <div id="clientPlanList"></div>
   </div>
@@ -179,6 +180,7 @@
     <button class="newbtn" id="clientProfileProgressBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">📈 View Progress</button>
     <button class="newbtn" id="clientProfileFoodLogBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">🍽️ Food Log</button>
     <button class="newbtn" id="clientProfilePhotoWorkoutBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">📷 Photo → Workout</button>
+    <button class="newbtn" id="clientProfilePhotoFoodBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">📷 Log Food from Photo</button>
     <button class="newbtn hidden" id="clientProfileEditBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">Edit Onboarding Info</button>
     <div class="panel" style="margin-top:13px">
       <h2>Onboarding info</h2>
@@ -268,6 +270,35 @@
       <div id="pwPreviewWrap" style="margin-top:10px"></div>
       <div id="pwError" class="auth-error hidden" style="margin-top:8px"></div>
       <button class="prog-log-btn" id="pwParseBtn" onclick="parseWorkoutPhoto()" disabled>Parse Photo</button>
+    </div>
+    <div style="height:30px"></div>
+  </div>
+
+  <!-- ============ LOG FOOD FROM PHOTO (AI estimate with a note field, returns ranges not fake precision) ============ -->
+  <div id="photoFoodView" class="hidden">
+    <div class="topbar">
+      <button class="ghost" onclick="backFromPhotoFoodView()">‹ Back</button>
+      <div class="brand" style="font-size:15px" id="photoFoodTitle"><span class="dot"></span> Log Food from Photo</div>
+    </div>
+    <div class="panel" style="margin-top:13px">
+      <h2>Upload a photo of the meal</h2>
+      <input type="file" id="pfPhotoInput" accept="image/*" onchange="handleFoodPhotoSelect(event)">
+      <div id="pfPreviewWrap" style="margin-top:10px"></div>
+      <div class="ob-section" style="margin-top:13px">
+        <label>Add any details you know</label>
+        <textarea class="fl-textarea" id="pfNotes" placeholder="e.g. 3 pc chicken with bone, 4 tbsp gravy, looks like 1 tbsp oil, some mix veg, 1 home made chapati"></textarea>
+        <div class="tip">The more you tell us, the more accurate the estimate — portion size, oil used, homemade vs restaurant, etc.</div>
+      </div>
+      <div id="pfError" class="auth-error hidden" style="margin-top:8px"></div>
+      <button class="prog-log-btn" id="pfParseBtn" onclick="parseFoodPhoto()" disabled>Estimate Calories</button>
+    </div>
+
+    <div id="pfReviewSection" class="hidden">
+      <h2 style="margin-top:18px">Review estimate</h2>
+      <div class="tip" style="margin-top:-4px">These are ranges, not exact numbers — photos can't give exact precision. Edit anything that looks off.</div>
+      <div id="pfReviewList"></div>
+      <div class="pf-meal-total" id="pfMealTotal"></div>
+      <button class="newbtn" style="background:var(--good)" onclick="confirmAndSavePhotoFood()">✓ Confirm & Save</button>
     </div>
     <div style="height:30px"></div>
   </div>
