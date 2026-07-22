@@ -103,6 +103,7 @@
     <button class="newbtn" style="background:var(--teal)" onclick="clientGenerateMyPlan()">✨ Generate My Plan</button>
     <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openProgressView('online',null)">📈 My Progress</button>
     <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openFoodLogView('online',null)">🍽️ Log Food</button>
+    <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openPhotoWorkoutView('online',null)">📷 Photo → Workout</button>
     <h2 style="margin-top:18px">Your assigned plans</h2>
     <div id="clientPlanList"></div>
   </div>
@@ -177,6 +178,7 @@
     <button class="newbtn hidden" id="clientProfileGenerateBtn" style="background:var(--teal)">✨ Auto-Generate Plan For This Client</button>
     <button class="newbtn" id="clientProfileProgressBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">📈 View Progress</button>
     <button class="newbtn" id="clientProfileFoodLogBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">🍽️ Food Log</button>
+    <button class="newbtn" id="clientProfilePhotoWorkoutBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">📷 Photo → Workout</button>
     <button class="newbtn hidden" id="clientProfileEditBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">Edit Onboarding Info</button>
     <div class="panel" style="margin-top:13px">
       <h2>Onboarding info</h2>
@@ -250,6 +252,23 @@
     <h2 style="margin-top:18px">Today's log</h2>
     <div class="fl-totals-bar" id="flTotalsBar"></div>
     <div id="flTodayList"></div>
+    <div style="height:30px"></div>
+  </div>
+
+  <!-- ============ PHOTO → WORKOUT (AI-parsed from a photo of a written plan) ============ -->
+  <div id="photoWorkoutView" class="hidden">
+    <div class="topbar">
+      <button class="ghost" onclick="backFromPhotoWorkoutView()">‹ Back</button>
+      <div class="brand" style="font-size:15px" id="photoWorkoutTitle"><span class="dot"></span> Photo → Workout</div>
+    </div>
+    <div class="panel" style="margin-top:13px">
+      <h2>Upload a photo of the written plan</h2>
+      <div class="tip" style="margin-top:-4px;margin-bottom:8px">Works with handwritten or typed workout lists. You'll get a chance to review and edit everything before saving.</div>
+      <input type="file" id="pwPhotoInput" accept="image/*" onchange="handleWorkoutPhotoSelect(event)">
+      <div id="pwPreviewWrap" style="margin-top:10px"></div>
+      <div id="pwError" class="auth-error hidden" style="margin-top:8px"></div>
+      <button class="prog-log-btn" id="pwParseBtn" onclick="parseWorkoutPhoto()" disabled>Parse Photo</button>
+    </div>
     <div style="height:30px"></div>
   </div>
 
