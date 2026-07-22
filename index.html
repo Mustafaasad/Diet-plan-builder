@@ -101,6 +101,7 @@
     </div>
     <div id="clientTrainerLine" style="font-size:12.5px;color:#7e9197;margin-top:10px;display:flex;align-items:center;gap:6px"></div>
     <button class="newbtn" style="background:var(--teal)" onclick="clientGenerateMyPlan()">✨ Generate My Plan</button>
+    <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openProgressView('online',null)">📈 My Progress</button>
     <h2 style="margin-top:18px">Your assigned plans</h2>
     <div id="clientPlanList"></div>
   </div>
@@ -173,11 +174,56 @@
       <div class="brand" style="font-size:15px" id="clientProfileTitle"><span class="dot"></span> Client</div>
     </div>
     <button class="newbtn hidden" id="clientProfileGenerateBtn" style="background:var(--teal)">✨ Auto-Generate Plan For This Client</button>
+    <button class="newbtn" id="clientProfileProgressBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">📈 View Progress</button>
     <button class="newbtn hidden" id="clientProfileEditBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">Edit Onboarding Info</button>
     <div class="panel" style="margin-top:13px">
       <h2>Onboarding info</h2>
       <div id="clientProfileBody"></div>
     </div>
+  </div>
+
+  <!-- ============ PROGRESS VIEW (chart + history, for self or a specific client) ============ -->
+  <div id="progressView" class="hidden">
+    <div class="topbar">
+      <button class="ghost" onclick="backFromProgressView()">‹ Back</button>
+      <div class="brand" style="font-size:15px" id="progressViewTitle"><span class="dot"></span> Progress</div>
+    </div>
+    <button class="prog-log-btn" onclick="openProgressLog()">+ Log New Entry</button>
+    <div class="prog-chart-wrap">
+      <h2>Weight over time</h2>
+      <div id="progressChartHolder"></div>
+    </div>
+    <h2 style="margin-top:18px">History</h2>
+    <div id="progressHistoryList"></div>
+    <button class="newbtn" style="background:#25803a" onclick="downloadProgressReport()">Download Progress Report (PDF)</button>
+    <div style="height:30px"></div>
+  </div>
+
+  <!-- ============ PROGRESS LOG (add a new measurement entry) ============ -->
+  <div id="progressLogView" class="hidden">
+    <div class="topbar">
+      <button class="ghost" onclick="cancelProgressLog()">‹ Cancel</button>
+      <div class="brand" style="font-size:15px"><span class="dot"></span> Log Entry</div>
+    </div>
+    <div class="panel" style="margin-top:13px">
+      <h2>Measurements</h2>
+      <div class="ob-twocol">
+        <div class="ob-section"><label>Weight (kg)</label><input type="number" id="plWeight" placeholder="e.g. 78"></div>
+        <div class="ob-section"><label>Waist (cm)</label><input type="number" id="plWaist" placeholder="e.g. 86"></div>
+      </div>
+      <div class="ob-twocol">
+        <div class="ob-section"><label>Chest (cm)</label><input type="number" id="plChest" placeholder="e.g. 102"></div>
+        <div class="ob-section"><label>Arms (cm)</label><input type="number" id="plArms" placeholder="e.g. 36"></div>
+      </div>
+      <div class="ob-twocol">
+        <div class="ob-section"><label>Thighs (cm)</label><input type="number" id="plThighs" placeholder="e.g. 58"></div>
+        <div class="ob-section"><label>Hips (cm)</label><input type="number" id="plHips" placeholder="e.g. 96"></div>
+      </div>
+      <div class="ob-section"><label>Notes</label><textarea id="plNotes" placeholder="How's it going, any context worth noting..."></textarea></div>
+      <div id="plError" class="auth-error hidden"></div>
+      <button class="ob-submit" id="plSubmitBtn" onclick="submitProgressLog()">Save Entry</button>
+    </div>
+    <div style="height:30px"></div>
   </div>
 
   <!-- ============ DIET TOOL ============ -->
