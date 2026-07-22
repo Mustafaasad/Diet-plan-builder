@@ -970,6 +970,8 @@ function gotoClientHome(){
   document.getElementById("homeView").classList.add("hidden");
   document.getElementById("dietApp").classList.add("hidden");
   document.getElementById("workoutApp").classList.add("hidden");
+  document.getElementById("progressView").classList.add("hidden");
+  document.getElementById("progressLogView").classList.add("hidden");
   document.getElementById("actionbar").classList.add("hidden");
   document.getElementById("wActionbar").classList.add("hidden");
   document.getElementById("rmAssignBar").classList.add("hidden");
@@ -986,6 +988,8 @@ function gotoHome(){
   document.getElementById("clientsListView").classList.add("hidden");
   document.getElementById("clientProfileView").classList.add("hidden");
   document.getElementById("formBuilderView").classList.add("hidden");
+  document.getElementById("progressView").classList.add("hidden");
+  document.getElementById("progressLogView").classList.add("hidden");
   document.getElementById("homeView").classList.remove("hidden");
   document.getElementById("dietApp").classList.add("hidden");
   document.getElementById("workoutApp").classList.add("hidden");
@@ -1051,6 +1055,7 @@ async function openClientProfile(id,kind){
     const {data:c,error}=await sb.from(table).select("full_name,onboarding,onboarding_completed").eq("id",id).single();
     if(error) throw error;
     document.getElementById("clientProfileTitle").innerHTML=`<span class="dot"></span> ${esc(c.full_name)||"Client"}`;
+    document.getElementById("clientProfileProgressBtn").onclick=()=>openProgressView(kind,id,c.full_name);
     if(!c.onboarding_completed||!c.onboarding){
       body.innerHTML=kind==="gym"
         ?'<div class="empty">No onboarding info yet for this client.</div>'
@@ -1128,6 +1133,208 @@ function cancelOnboardingEdit(){
   document.getElementById("appWrap").classList.remove("hidden");
   openClients();
 }
+
+/* ====================== PROGRESS TRACKING (measurements + photos + chart + PDF report) ======================
+   Works for a client viewing their own progress, or a trainer viewing any linked client (online or gym). */
+const MEASURE_FIELDS=[
+  {key:"weight",label:"Weight",unit:"kg"},
+  {key:"waist",label:"Waist",unit:"cm"},
+  {key:"chest",label:"Chest",unit:"cm"},
+  {key:"arms",label:"Arms",unit:"cm"},
+  {key:"thighs",label:"Thighs",unit:"cm"},
+  {key:"hips",label:"Hips",unit:"cm"}
+];
+let progressCtx={kind:"online",id:null,trainerId:null,label:""};
+let progressOpenedFromClientProfile=false;
+let progressEntries=[];
+
+function openProgressView(kind,id,label){
+  progressOpenedFromClientProfile = !(kind==="online" && id===null);
+  if(kind==="online" && id===null){
+    // client viewing their own progress
+    progressCtx={kind:"online", id:currentUser.id, trainerId:currentProfile.trainer_id||null, label:currentProfile.full_name||"You"};
+  } else {
+    progressCtx={kind, id, trainerId:currentUser.id, label:label||"Client"};
+  }
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("dietApp").classList.add("hidden");
+  document.getElementById("workoutApp").classList.add("hidden");
+  document.getElementById("clientHomeView").classList.add("hidden");
+  document.getElementById("clientsListView").classList.add("hidden");
+  document.getElementById("clientProfileView").classList.add("hidden");
+  document.getElementById("progressLogView").classList.add("hidden");
+  document.getElementById("progressView").classList.remove("hidden");
+  document.getElementById("progressViewTitle").innerHTML=`<span class="dot"></span> ${esc(progressCtx.label)}'s Progress`;
+  renderProgressView();
+  window.scrollTo(0,0);
+}
+function backFromProgressView(){
+  document.getElementById("progressView").classList.add("hidden");
+  if(progressOpenedFromClientProfile){
+    document.getElementById("clientProfileView").classList.remove("hidden");
+  } else {
+    document.getElementById("clientHomeView").classList.remove("hidden");
+  }
+}
+
+async function fetchProgressEntries(){
+  const {data,error}=await sb.from("measurements")
+    .select("*").eq("client_kind",progressCtx.kind).eq("client_id",progressCtx.id)
+    .order("logged_at",{ascending:true});
+  if(error){ console.error("fetchProgressEntries failed:",error); return []; }
+  return data||[];
+}
+
+async function renderProgressView(){
+  const chartHolder=document.getElementById("progressChartHolder");
+  const histList=document.getElementById("progressHistoryList");
+  chartHolder.innerHTML='<div class="empty">Loading...</div>';
+  histList.innerHTML="";
+  try{
+    progressEntries=await fetchProgressEntries();
+    if(!progressEntries.length){
+      chartHolder.innerHTML='<div class="empty">No entries yet. Tap "+ Log New Entry" to start tracking.</div>';
+      histList.innerHTML="";
+      return;
+    }
+    chartHolder.innerHTML=buildWeightChartSVG(progressEntries);
+    // render newest-first history
+    const entries=[...progressEntries].reverse();
+    for(const e of entries){
+      histList.insertAdjacentHTML("beforeend", renderProgressEntryCard(e));
+    }
+  }catch(err){
+    console.error("renderProgressView failed:",err);
+    chartHolder.innerHTML='<div class="empty">Couldn\'t load progress. Try again.</div>';
+  }
+}
+
+function buildWeightChartSVG(entries){
+  const pts=entries.filter(e=>e.weight!=null).map(e=>({date:e.logged_at, val:parseFloat(e.weight)}));
+  if(pts.length<2) return '<div class="empty">Log at least 2 weight entries to see the trend line.</div>';
+  const vals=pts.map(p=>p.val);
+  const minV=Math.min(...vals), maxV=Math.max(...vals), range=(maxV-minV)||1;
+  const W=320,H=160,pad=30;
+  const cx=i=>pad+(i/(pts.length-1))*(W-pad*2);
+  const cy=v=>H-pad-((v-minV)/range)*(H-pad*2);
+  const line=pts.map((p,i)=>`${cx(i)},${cy(p.val)}`).join(" ");
+  const dots=pts.map((p,i)=>`
+    <circle cx="${cx(i)}" cy="${cy(p.val)}" r="5" fill="var(--teal)" stroke="#fff" stroke-width="2"/>
+    <text x="${cx(i)}" y="${cy(p.val)-10}" text-anchor="middle" font-size="10" fill="var(--teal)" font-weight="700">${p.val}kg</text>
+    <text x="${cx(i)}" y="${H-8}" text-anchor="middle" font-size="9" fill="#90a3a8">${new Date(p.date).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</text>`).join("");
+  const first=vals[0], last=vals[vals.length-1], diff=(last-first).toFixed(1);
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible">
+    <polyline points="${line}" fill="none" stroke="var(--teal-2)" stroke-width="2.5" stroke-linejoin="round"/>
+    <line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#e0e8ea" stroke-width="1"/>
+    ${dots}
+  </svg>
+  <div style="text-align:center;font-size:12px;color:#7e9197;margin-top:4px">
+    Start: <b>${first} kg</b> &nbsp;·&nbsp; Now: <b>${last} kg</b> &nbsp;·&nbsp; ${diff>0?"+"+diff:diff} kg
+  </div>`;
+}
+
+function renderProgressEntryCard(entry){
+  const idx=progressEntries.findIndex(e=>e.id===entry.id);
+  const prev=idx>0?progressEntries[idx-1]:null;
+  const date=new Date(entry.logged_at).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+  const grid=MEASURE_FIELDS.filter(f=>entry[f.key]!=null).map(f=>{
+    let trend="";
+    if(prev && prev[f.key]!=null){
+      const d=entry[f.key]-prev[f.key];
+      if(Math.abs(d)>0.05) trend=`<div style="font-size:9px;font-weight:700" class="${d>0?'trend-up':'trend-down'}">${d>0?"+":""}${d.toFixed(1)}</div>`;
+    }
+    return `<div class="m"><div class="l">${f.label}</div><div class="v">${entry[f.key]}${f.unit}</div>${trend}</div>`;
+  }).join("");
+  return `<div class="prog-entry-card">
+    <div class="prog-entry-date">${date}</div>
+    ${grid?`<div class="prog-entry-grid">${grid}</div>`:""}
+    ${entry.notes?`<div class="tip" style="margin-top:8px">${esc(entry.notes)}</div>`:""}
+  </div>`;
+}
+
+/* ---- logging a new entry ---- */
+function openProgressLog(){
+  ["plWeight","plWaist","plChest","plArms","plThighs","plHips","plNotes"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("plError").classList.add("hidden");
+  document.getElementById("progressView").classList.add("hidden");
+  document.getElementById("progressLogView").classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+function cancelProgressLog(){
+  document.getElementById("progressLogView").classList.add("hidden");
+  document.getElementById("progressView").classList.remove("hidden");
+}
+async function submitProgressLog(){
+  const errEl=document.getElementById("plError");
+  const btn=document.getElementById("plSubmitBtn");
+  btn.disabled=true; btn.textContent="Saving...";
+  try{
+    const row={
+      trainer_id: progressCtx.trainerId,
+      client_kind: progressCtx.kind,
+      client_id: progressCtx.id,
+      logged_at: new Date().toISOString().slice(0,10),
+      weight: document.getElementById("plWeight").value?parseFloat(document.getElementById("plWeight").value):null,
+      waist: document.getElementById("plWaist").value?parseFloat(document.getElementById("plWaist").value):null,
+      chest: document.getElementById("plChest").value?parseFloat(document.getElementById("plChest").value):null,
+      arms: document.getElementById("plArms").value?parseFloat(document.getElementById("plArms").value):null,
+      thighs: document.getElementById("plThighs").value?parseFloat(document.getElementById("plThighs").value):null,
+      hips: document.getElementById("plHips").value?parseFloat(document.getElementById("plHips").value):null,
+      notes: document.getElementById("plNotes").value.trim()||null
+    };
+    const {error}=await sb.from("measurements").insert(row);
+    if(error) throw error;
+
+    btn.disabled=false; btn.textContent="Save Entry";
+    document.getElementById("progressLogView").classList.add("hidden");
+    document.getElementById("progressView").classList.remove("hidden");
+    toast("Entry saved");
+    renderProgressView();
+  }catch(e){
+    console.error("submitProgressLog failed:",e);
+    btn.disabled=false; btn.textContent="Save Entry";
+    errEl.textContent="Couldn't save — try again.";
+    errEl.classList.remove("hidden");
+  }
+}
+
+/* ---- downloadable PDF report ---- */
+async function downloadProgressReport(){
+  if(!progressEntries.length){ toast("No entries to report yet"); return; }
+  const chartSVG=buildWeightChartSVG(progressEntries);
+  const latest=progressEntries[progressEntries.length-1];
+  const first=progressEntries[0];
+  const statRows=MEASURE_FIELDS.map(f=>{
+    if(latest[f.key]==null) return "";
+    const startVal=first[f.key]!=null?first[f.key]:latest[f.key];
+    const diff=(latest[f.key]-startVal).toFixed(1);
+    return `<tr style="border-bottom:1px solid #ede9e5;">
+      <td style="padding:8px 14px;font-size:12.5px;font-weight:600">${f.label}</td>
+      <td style="padding:8px 8px;text-align:center;font-size:12.5px">${startVal}${f.unit}</td>
+      <td style="padding:8px 8px;text-align:center;font-size:12.5px;font-weight:700">${latest[f.key]}${f.unit}</td>
+      <td style="padding:8px 14px;text-align:right;font-size:12.5px;font-weight:700;color:${diff>0?"#BB080B":"#25803a"}">${diff>0?"+":""}${diff}${f.unit}</td>
+    </tr>`;
+  }).join("");
+
+  const bodyHTML=`
+    <div style="margin:16px 24px 0;text-align:center">${chartSVG}</div>
+    <div style="margin:16px 24px 0">
+      <div style="background:#111;color:#fff;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">MEASUREMENTS</div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:#F0EDE8">
+          <th style="padding:7px 14px;text-align:left;font-size:10px;text-transform:uppercase;color:#555;font-weight:700">Metric</th>
+          <th style="padding:7px 8px;text-align:center;font-size:10px;text-transform:uppercase;color:#555;font-weight:700">Start</th>
+          <th style="padding:7px 8px;text-align:center;font-size:10px;text-transform:uppercase;color:#555;font-weight:700">Latest</th>
+          <th style="padding:7px 14px;text-align:right;font-size:10px;text-transform:uppercase;color:#555;font-weight:700">Change</th>
+        </tr></thead>
+        <tbody>${statRows}</tbody>
+      </table>
+    </div>`;
+
+  const date=new Date().toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"});
+  mmPDFOpen(mmPDFShell(`${progressCtx.label} – Progress Report`,"Progress Report",progressCtx.label,"",date,bodyHTML,"Keep up the consistency — small changes compound over time."));
+}
+
 function openDiet(){ 
   document.getElementById("homeView").classList.add("hidden");
   document.getElementById("dietApp").classList.remove("hidden");
