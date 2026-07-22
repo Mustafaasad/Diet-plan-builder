@@ -1,491 +1,362 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Coach Mustafa — Plan Builder</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
+  :root{
+    --ink:#0e2a33;--teal:#1f4e5f;--teal-2:#2f6c80;--mist:#eef3f4;--line:#d9e2e4;
+    --amber:#e8821e;--amber-soft:#fbe9d3;--amber-ink:#9a4e0c;--good:#2f8f5b;--over:#c0492f;
+    --paper:#f6f9f9;--white:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--paper);
+    color:var(--ink);line-height:1.45;font-size:15px}
+  .wrap{max-width:560px;margin:0 auto;padding:14px 14px 110px}
+  .hidden{display:none!important}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.9px;color:var(--teal-2);
+    margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  h2::before{content:"";width:16px;height:2px;background:var(--amber);border-radius:2px}
+  .panel{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:13px}
+  .tip{font-size:11.5px;color:#7e9197;margin-top:7px}
 
-<datalist id="foodDatalist"></datalist>
-<datalist id="exerciseDatalist"></datalist>
+  .topbar{background:var(--teal);color:#fff;border-radius:16px;padding:15px 16px;
+    box-shadow:0 6px 18px rgba(15,42,51,.16);display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:17px}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--amber);flex:none}
+  .ghost{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:9px;padding:8px 12px;
+    font-size:14px;font-weight:600;cursor:pointer}
+  .ghost:hover{background:rgba(255,255,255,.28)}
 
-<!-- ============ AUTH SCREEN ============ -->
-<div id="authView">
-  <div class="auth-wrap">
-    <div class="auth-card">
-      <div class="auth-logo">
-        <div class="brand"><span class="dot"></span> COACH MUSTAFA</div>
-      </div>
-      <div class="auth-tabs">
-        <div class="auth-tab active" id="tabLogin" onclick="setAuthTab('login')">Log In</div>
-        <div class="auth-tab" id="tabSignup" onclick="setAuthTab('signup')">Sign Up</div>
-      </div>
+  .newbtn{width:100%;margin-top:13px;background:var(--amber);color:#fff;border:none;padding:14px;
+    border-radius:13px;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 4px 12px rgba(232,130,30,.3)}
+  .newbtn:active{transform:translateY(1px)}
+  .plan-card{background:var(--white);border:1px solid var(--line);border-radius:13px;padding:13px 14px;
+    margin-top:11px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+  .plan-card:active{background:#f0f6f7}
+  .plan-card .who{font-weight:700;font-size:16px}
+  .plan-card .meta{font-size:12px;color:#7e9197;margin-top:2px}
+  .plan-card .kcal{font-weight:800;color:var(--teal);font-size:15px;text-align:right;white-space:nowrap}
+  .plan-card .del{background:none;border:none;color:#b14;font-size:20px;cursor:pointer;padding:4px 2px 4px 10px}
+  .empty{text-align:center;color:#90a3a8;padding:40px 10px;font-size:14px}
 
-      <!-- LOGIN FORM -->
-      <div id="loginForm">
-        <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"></div>
-        <div class="auth-field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
-        <button class="auth-submit" id="loginBtn" onclick="doLogin()">Log In</button>
-      </div>
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--teal-2);margin-bottom:4px}
+  .field input{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);font-size:15px;background:#fff}
+  .field select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);font-size:15px;background:#fff}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-      <!-- SIGNUP FORM -->
-      <div id="signupForm" class="hidden">
-        <div class="auth-field"><label>Full Name</label><input id="suName" placeholder="e.g. Ayesha Khan"></div>
-        <div class="auth-field"><label>Email</label><input type="email" id="suEmail" placeholder="you@email.com"></div>
-        <div class="auth-field"><label>Password</label><input type="password" id="suPassword" placeholder="At least 6 characters"></div>
-        <div class="auth-field">
-          <label>I am a...</label>
-          <div class="role-toggle">
-            <div class="role-btn active" id="roleTrainerBtn" onclick="setSignupRole('trainer')">Trainer</div>
-            <div class="role-btn" id="roleClientBtn" onclick="setSignupRole('client')">Client</div>
-          </div>
-        </div>
+  .tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .tbox{text-align:center}
+  .tbox .lab{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);margin-bottom:4px}
+  .tbox input{width:100%;border:1px solid var(--line);border-radius:9px;text-align:center;font-size:16px;
+    font-weight:700;padding:9px 2px;color:var(--teal);background:#fff}
 
-        <button class="auth-submit" id="signupBtn" onclick="doSignup()">Create Account</button>
-      </div>
+  .pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .pbox{background:var(--mist);border-radius:12px;padding:11px 12px}
+  .pbox .name{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--teal-2);font-weight:600}
+  .pbox .used{font-size:20px;font-weight:800;margin-top:3px}
+  .pbox .used small{font-size:12px;font-weight:600;color:#7e9197}
+  .bar{height:8px;background:#dde6e7;border-radius:5px;margin-top:8px;overflow:hidden}
+  .bar>span{display:block;height:100%;background:var(--teal-2);border-radius:5px;transition:width .25s,background .25s}
+  .pbox .left{font-size:11px;margin-top:5px;color:var(--teal-2);font-weight:600}
+  .pbox .left.over{color:var(--over)}
 
-      <div id="authError" class="auth-error hidden"></div>
-      <div id="authMsg" class="auth-msg hidden"></div>
-    </div>
-  </div>
-</div>
+  .meal{border:1px solid var(--line);border-radius:13px;margin-top:12px;overflow:hidden;background:#fff}
+  .meal-head{background:var(--teal);color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between}
+  .meal-head input{font-weight:700;font-size:15px;background:transparent;border:none;color:#fff;width:72%}
+  .meal-head input:focus{outline:1px solid rgba(255,255,255,.4);border-radius:5px}
+  .iconbtn{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:8px;width:30px;height:30px;font-size:15px;cursor:pointer}
+  .iconbtn:hover{background:rgba(255,255,255,.3)}
+  .rows{padding:8px 10px}
+  .frow{display:grid;grid-template-columns:1fr 72px auto 26px;gap:7px;align-items:center;padding:5px 0}
+  .frow select,.frow input{padding:9px 8px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;width:100%}
+  .qtywrap{display:flex;flex-direction:column;align-items:center}
+  .qtywrap .unit{font-size:10px;color:#7e9197;margin-top:2px;font-weight:600;letter-spacing:.3px;min-height:12px}
+  .frow .mac{font-size:11px;color:var(--teal-2);text-align:right;line-height:1.2;white-space:nowrap}
+  .frow .mac b{color:var(--ink)}
+  .rmrow{background:none;border:none;color:#b14;font-size:18px;cursor:pointer;padding:0}
+  .add-food{margin:5px 2px 6px;background:var(--amber-soft);color:var(--amber-ink);border:none;padding:9px 13px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer}
+  .add-food:active{background:#f6d6b6}
+  .meal-sub{padding:8px 12px;background:var(--mist);font-size:12px;color:var(--teal);display:flex;justify-content:flex-end;gap:13px;font-weight:600}
+  .add-meal{width:100%;margin-top:12px;background:#fff;border:1.5px dashed var(--teal-2);color:var(--teal);padding:12px;border-radius:12px;font-weight:700;cursor:pointer;font-size:14px}
+  .add-meal:active{background:#eef6f7}
 
-<!-- ============ CLIENT ONBOARDING (forced, right after signup) ============ -->
-<!-- ============ CHOOSE TRAINER (first, right after client signup) ============ -->
-<div id="chooseTrainerView" class="hidden">
-  <div class="ob-wrap">
-    <div class="ob-card">
-      <div class="ob-head">
-        <div class="brand"><span class="dot"></span> COACH MUSTAFA</div>
-        <p id="chooseTrainerPrompt">Are you training with a coach, or using the app on your own?</p>
-      </div>
-      <div id="trainerPickList"></div>
-      <button class="ob-submit" style="background:var(--teal);margin-top:16px" onclick="skipTrainerChoice()">I'll use the app on my own</button>
-      <button class="ob-submit hidden" id="cancelChangeTrainerBtn" style="background:#fff;color:#7e9197;border:1.5px solid var(--line);margin-top:10px" onclick="cancelChangeTrainer()">Cancel</button>
-    </div>
-  </div>
-</div>
+  .actionbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);
+    backdrop-filter:blur(6px);border-top:1px solid var(--line);padding:10px 14px;display:flex;gap:10px;
+    max-width:560px;margin:0 auto;z-index:30}
+  .actionbar button{flex:1;padding:13px;border-radius:12px;border:none;font-weight:700;font-size:14px;cursor:pointer}
+  .btn-save{background:var(--teal);color:#fff}
+  .btn-save:active{background:#163b47}
+  .btn-pdf{background:#25803a;color:#fff}
+  .btn-pdf:active{background:#1c6630}
 
-<div id="onboardingView" class="hidden">
-  <div class="ob-wrap">
-    <div class="ob-card">
-      <div class="ob-head">
-        <div class="brand"><span class="dot"></span> COACH MUSTAFA</div>
-        <p>A few quick questions so your coach can build the right plan for you.</p>
-      </div>
+  .toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%) translateY(16px);background:var(--ink);
+    color:#fff;padding:11px 18px;border-radius:30px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:60}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-      <div class="ob-section hidden" id="obGymNameSection">
-        <label>Client Name<span class="ob-req">*</span></label>
-        <input id="obGymName" placeholder="e.g. Ali Raza">
-      </div>
+  /* HOME SCREEN */
+  .home-hero{background:var(--teal);border-radius:16px;padding:22px 18px;
+    box-shadow:0 6px 18px rgba(15,42,51,.16);text-align:center;color:#fff}
+  .home-hero .brand{justify-content:center;font-size:20px;margin-bottom:4px}
+  .home-hero p{font-size:13px;opacity:.8;margin-top:4px}
+  .tool-cards{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:16px}
+  .tool-card{background:var(--white);border:1px solid var(--line);border-radius:16px;
+    padding:22px 14px;text-align:center;cursor:pointer;transition:box-shadow .2s,transform .1s}
+  .tool-card:active{transform:translateY(1px);box-shadow:0 2px 8px rgba(15,42,51,.1)}
+  .tool-card:hover{box-shadow:0 4px 16px rgba(15,42,51,.1)}
+  .tool-card .icon{font-size:32px;margin-bottom:10px}
+  .tool-card .label{font-weight:800;font-size:15px;color:var(--teal)}
+  .tool-card .sub{font-size:12px;color:#7e9197;margin-top:4px}
 
-      <div id="obFields"></div>
+  /* AUTH SCREEN */
+  .auth-wrap{max-width:380px;margin:0 auto;padding:50px 20px}
+  .auth-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px 22px}
+  .auth-logo{text-align:center;margin-bottom:22px}
+  .auth-logo .brand{justify-content:center;font-size:19px}
+  .auth-tabs{display:flex;background:var(--mist);border-radius:11px;padding:4px;margin-bottom:18px}
+  .auth-tab{flex:1;text-align:center;padding:9px;border-radius:8px;font-weight:700;font-size:13px;
+    cursor:pointer;color:#7e9197}
+  .auth-tab.active{background:#fff;color:var(--teal);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .auth-field{margin-top:13px}
+  .auth-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--teal-2);margin-bottom:4px;font-weight:600}
+  .auth-field input{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);font-size:15px}
+  .role-toggle{display:flex;gap:8px;margin-top:13px}
+  .role-btn{flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#fff;
+    text-align:center;font-weight:700;font-size:13px;cursor:pointer;color:#7e9197}
+  .role-btn.active{border-color:var(--teal);background:var(--teal);color:#fff}
+  .auth-submit{width:100%;margin-top:18px;background:var(--amber);color:#fff;border:none;padding:13px;
+    border-radius:11px;font-weight:700;font-size:15px;cursor:pointer}
+  .auth-submit:disabled{opacity:.6}
+  .auth-error{margin-top:12px;background:#fde8e6;color:#c0492f;padding:9px 12px;border-radius:9px;
+    font-size:12.5px;font-weight:600}
+  .auth-msg{margin-top:12px;background:#e5f5ed;color:#1e7a45;padding:9px 12px;border-radius:9px;
+    font-size:12.5px;font-weight:600}
+  .signout-btn{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:9px;padding:7px 12px;
+    font-size:12px;font-weight:600;cursor:pointer}
+  /* ONBOARDING QUESTIONNAIRE */
+  .ob-wrap{max-width:480px;margin:0 auto;padding:24px 16px 60px}
+  .ob-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 20px}
+  .ob-head{text-align:center;margin-bottom:18px}
+  .ob-head .brand{justify-content:center;font-size:18px}
+  .ob-head p{font-size:12.5px;color:#7e9197;margin-top:6px}
+  .ob-section{margin-top:18px}
+  .ob-section:first-of-type{margin-top:0}
+  .ob-section label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--teal-2);font-weight:700;margin-bottom:6px}
+  .ob-section input,.ob-section select,.ob-section textarea{width:100%;padding:11px;border-radius:10px;
+    border:1px solid var(--line);font-size:15px;background:#fff;font-family:inherit}
+  .ob-section textarea{min-height:60px;resize:vertical}
+  .ob-twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ob-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .ob-chip{border:1.5px solid var(--line);background:#fff;color:#7e9197;padding:8px 13px;border-radius:20px;
+    font-size:12.5px;font-weight:600;cursor:pointer}
+  .ob-chip.active{border-color:var(--teal);background:var(--teal);color:#fff}
+  .ob-submit{width:100%;margin-top:22px;background:var(--amber);color:#fff;border:none;padding:14px;
+    border-radius:12px;font-weight:700;font-size:15px;cursor:pointer}
+  .ob-submit:disabled{opacity:.5;cursor:not-allowed}
+  .ob-req{color:#c0492f;margin-left:2px}
+  /* CLIENT ROSTER / PROFILE (trainer view) */
+  .client-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 14px;
+    margin-top:11px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+  .client-card:active{background:#f0f6f7}
+  .client-card .badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px}
+  .badge-done{background:#e5f5ed;color:#1e7a45}
+  .badge-pending{background:var(--amber-soft);color:var(--amber-ink)}
+  .ob-summary-row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--mist)}
+  .ob-summary-row:last-of-type{border-bottom:none}
+  .ob-summary-row .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--teal-2);font-weight:700;flex:none;width:130px}
+  .ob-summary-row .val{font-size:14px;text-align:right;flex:1}
+  .trainer-pick-card{border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;margin-top:10px;
+    cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+  .trainer-pick-card:active{background:var(--mist)}
+  .trainer-pick-card .who{font-weight:700;font-size:15px}
+  .fb-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--mist)}
+  .fb-row:last-of-type{border-bottom:none}
+  .fb-row .lbl{font-size:14px;font-weight:600}
+  .fb-row .lbl .locked{font-size:10px;color:#90a3a8;font-weight:600;margin-left:6px;text-transform:uppercase}
+  .fb-toggle{width:46px;height:26px;border-radius:20px;border:none;background:var(--line);position:relative;cursor:pointer;flex:none}
+  .fb-toggle.on{background:var(--good)}
+  .fb-toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+    background:#fff;transition:left .15s}
+  .fb-toggle.on::after{left:23px}
+  .fb-toggle:disabled{opacity:.5;cursor:not-allowed}
+  /* CLIENT VIEW */
+  .client-plan-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;
+    margin-top:11px;cursor:pointer}
+  .client-plan-card:active{background:#f0f6f7}
+  .client-plan-card .kind-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;padding:2px 9px;border-radius:8px;margin-bottom:6px}
+  .kind-diet{background:#e5f5ed;color:#1e7a45}
+  .kind-workout{background:var(--amber-soft);color:var(--amber-ink)}
 
-      <div id="obError" class="auth-error hidden"></div>
-      <button class="ob-submit" id="obSubmitBtn" onclick="submitOnboarding()">Finish Setup</button>
-      <button class="ob-submit hidden" id="obCancelBtn" style="background:#fff;color:#7e9197;border:1.5px solid var(--line);margin-top:10px" onclick="cancelOnboardingEdit()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<div class="wrap hidden" id="appWrap">
-
-  <!-- ============ CLIENT HOME ============ -->
-  <div id="clientHomeView" class="hidden">
-    <div class="topbar">
-      <div class="brand" style="font-size:15px"><span class="dot"></span> <span id="clientGreeting">My Plans</span></div>
-      <button class="signout-btn" onclick="doSignOut()">Sign Out</button>
-    </div>
-    <div id="clientTrainerLine" style="font-size:12.5px;color:#7e9197;margin-top:10px;display:flex;align-items:center;gap:6px"></div>
-    <button class="newbtn" style="background:var(--teal)" onclick="clientGenerateMyPlan()">✨ Generate My Plan</button>
-    <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openProgressView('online',null)">📈 My Progress</button>
-    <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openFoodLogView('online',null)">🍽️ Log Food</button>
-    <h2 style="margin-top:18px">Your assigned plans</h2>
-    <div id="clientPlanList"></div>
-  </div>
-
-  <!-- ============ HOME SCREEN ============ -->
-  <div id="homeView">
-    <div class="home-hero" style="position:relative">
-      <button class="signout-btn" style="position:absolute;top:14px;right:14px" onclick="doSignOut()">Sign Out</button>
-      <div class="brand" style="display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;justify-content:center;font-size:20px;margin-bottom:4px">
-        <span class="dot"></span> COACH MUSTAFA
-      </div>
-      <p>Choose a tool to get started</p>
-    </div>
-    <div class="tool-cards">
-      <div class="tool-card" onclick="openDiet()">
-        <div class="icon">🥗</div>
-        <div class="label">Diet Plan</div>
-        <div class="sub">Meals · Macros · PDF</div>
-      </div>
-      <div class="tool-card" onclick="openWorkout()">
-        <div class="icon">🏋️</div>
-        <div class="label">Workout Plan</div>
-        <div class="sub">Exercises · Sets · PDF</div>
-      </div>
-      <div class="tool-card" onclick="openClients()">
-        <div class="icon">👤</div>
-        <div class="label">Clients</div>
-        <div class="sub">Onboarding info</div>
-      </div>
-      <div class="tool-card" onclick="openFormBuilder()">
-        <div class="icon">📝</div>
-        <div class="label">Onboarding Form</div>
-        <div class="sub">Choose what to ask</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ ONBOARDING FORM BUILDER (trainer) ============ -->
-  <div id="formBuilderView" class="hidden">
-    <div class="topbar">
-      <button class="ghost" onclick="gotoHome()">‹ Home</button>
-      <div class="brand" style="font-size:15px"><span class="dot"></span> Onboarding Form</div>
-    </div>
-    <div class="panel" style="margin-top:13px">
-      <h2>Questions your new clients see</h2>
-      <div class="tip" style="margin-top:-4px;margin-bottom:8px">Age and Goal are always asked. Toggle the rest on or off — this applies to every new client who picks you as their trainer.</div>
-      <div id="fbList"></div>
-    </div>
-    <div class="actionbar" id="fbActionbar">
-      <button class="btn-save" onclick="saveFormBuilder()">Save</button>
-    </div>
-    <div style="height:80px"></div>
-  </div>
-
-  <!-- ============ CLIENTS ROSTER (trainer) ============ -->
-  <div id="clientsListView" class="hidden">
-    <div class="topbar">
-      <button class="ghost" onclick="gotoHome()">‹ Home</button>
-      <div class="brand" style="font-size:15px"><span class="dot"></span> Clients</div>
-    </div>
-    <button class="newbtn" onclick="openAddGymClient()">+ Add Client</button>
-    <h2 style="margin-top:18px">Your clients</h2>
-    <div id="clientsList"></div>
-  </div>
-
-  <!-- ============ CLIENT PROFILE (read-only, trainer) ============ -->
-  <div id="clientProfileView" class="hidden">
-    <div class="topbar">
-      <button class="ghost" onclick="backToClientsList()">‹ Clients</button>
-      <div class="brand" style="font-size:15px" id="clientProfileTitle"><span class="dot"></span> Client</div>
-    </div>
-    <button class="newbtn hidden" id="clientProfileGenerateBtn" style="background:var(--teal)">✨ Auto-Generate Plan For This Client</button>
-    <button class="newbtn" id="clientProfileProgressBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">📈 View Progress</button>
-    <button class="newbtn" id="clientProfileFoodLogBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">🍽️ Food Log</button>
-    <button class="newbtn hidden" id="clientProfileEditBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">Edit Onboarding Info</button>
-    <div class="panel" style="margin-top:13px">
-      <h2>Onboarding info</h2>
-      <div id="clientProfileBody"></div>
-    </div>
-  </div>
-
-  <!-- ============ PROGRESS VIEW (chart + history, for self or a specific client) ============ -->
-  <div id="progressView" class="hidden">
-    <div class="topbar">
-      <button class="ghost" onclick="backFromProgressView()">‹ Back</button>
-      <div class="brand" style="font-size:15px" id="progressViewTitle"><span class="dot"></span> Progress</div>
-    </div>
-    <button class="prog-log-btn" onclick="openProgressLog()">+ Log New Entry</button>
-    <div class="prog-chart-wrap">
-      <h2>Weight over time</h2>
-      <div id="progressChartHolder"></div>
-    </div>
-    <h2 style="margin-top:18px">History</h2>
-    <div id="progressHistoryList"></div>
-    <button class="newbtn" style="background:#25803a" onclick="downloadProgressReport()">Download Progress Report (PDF)</button>
-    <div style="height:30px"></div>
-  </div>
-
-  <!-- ============ PROGRESS LOG (add a new measurement entry) ============ -->
-  <div id="progressLogView" class="hidden">
-    <div class="topbar">
-      <button class="ghost" onclick="cancelProgressLog()">‹ Cancel</button>
-      <div class="brand" style="font-size:15px"><span class="dot"></span> Log Entry</div>
-    </div>
-    <div class="panel" style="margin-top:13px">
-      <h2>Measurements</h2>
-      <div class="ob-twocol">
-        <div class="ob-section"><label>Weight (kg)</label><input type="number" id="plWeight" placeholder="e.g. 78"></div>
-        <div class="ob-section"><label>Waist (cm)</label><input type="number" id="plWaist" placeholder="e.g. 86"></div>
-      </div>
-      <div class="ob-twocol">
-        <div class="ob-section"><label>Chest (cm)</label><input type="number" id="plChest" placeholder="e.g. 102"></div>
-        <div class="ob-section"><label>Arms (cm)</label><input type="number" id="plArms" placeholder="e.g. 36"></div>
-      </div>
-      <div class="ob-twocol">
-        <div class="ob-section"><label>Thighs (cm)</label><input type="number" id="plThighs" placeholder="e.g. 58"></div>
-        <div class="ob-section"><label>Hips (cm)</label><input type="number" id="plHips" placeholder="e.g. 96"></div>
-      </div>
-      <div class="ob-section"><label>Notes</label><textarea id="plNotes" placeholder="How's it going, any context worth noting..."></textarea></div>
-      <div id="plError" class="auth-error hidden"></div>
-      <button class="ob-submit" id="plSubmitBtn" onclick="submitProgressLog()">Save Entry</button>
-    </div>
-    <div style="height:30px"></div>
-  </div>
-
-  <!-- ============ FOOD LOG (free-text, AI-matched to food database) ============ -->
-  <div id="foodLogView" class="hidden">
-    <div class="topbar">
-      <button class="ghost" onclick="backFromFoodLogView()">‹ Back</button>
-      <div class="brand" style="font-size:15px" id="foodLogTitle"><span class="dot"></span> Food Log</div>
-    </div>
-    <div class="panel" style="margin-top:13px">
-      <h2>What did you eat?</h2>
-      <textarea class="fl-textarea" id="flText" placeholder="e.g. 2 eggs and a slice of toast for breakfast, and a banana"></textarea>
-      <div id="flError" class="auth-error hidden" style="margin-top:8px"></div>
-      <button class="prog-log-btn" id="flParseBtn" onclick="parseFoodLogText()">Parse & Log</button>
-    </div>
-
-    <div id="flReviewSection" class="hidden">
-      <h2 style="margin-top:18px">Confirm these items</h2>
-      <div id="flReviewList"></div>
-      <button class="newbtn" style="background:var(--good)" onclick="confirmAndSaveFoodLog()">✓ Confirm & Save</button>
-    </div>
-
-    <h2 style="margin-top:18px">Today's log</h2>
-    <div class="fl-totals-bar" id="flTotalsBar"></div>
-    <div id="flTodayList"></div>
-    <div style="height:30px"></div>
-  </div>
-
-  <!-- ============ DIET TOOL ============ -->
-  <div id="dietApp" class="hidden">
-
-    <!-- LIBRARY VIEW -->
-    <div id="libView">
-      <div class="topbar">
-        <button class="ghost" onclick="gotoHome()">‹ Home</button>
-        <div class="brand" style="font-size:15px"><span class="dot"></span> Diet Plans</div>
-      </div>
-      <button class="newbtn" onclick="newPlan()">+ New plan</button>
-      <h2 style="margin-top:18px">Saved plans</h2>
-      <div id="planList"></div>
-    </div>
-
-    <!-- EDITOR VIEW -->
-    <div id="editView" class="hidden">
-      <div class="topbar">
-        <button class="ghost" onclick="backToLibrary()">‹ Plans</button>
-        <div class="brand" style="font-size:15px"><span class="dot"></span> Diet Plan</div>
-      </div>
-
-      <div class="panel">
-        <div class="twocol">
-          <div class="field"><label>Client</label><input id="client" placeholder="e.g. Ayesha" oninput="markDirty()"></div>
-          <div class="field"><label>Goal</label><input id="goal" placeholder="e.g. Fat Loss" oninput="markDirty()"></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2>Set daily targets</h2>
-        <div class="tgrid" id="targets"></div>
-        <div class="tip">Type the day's goal. Leave 0 if you don't track that one.</div>
-      </div>
-
-      <div class="panel">
-        <h2>Progress · updates as you add food</h2>
-        <div class="pgrid" id="progress"></div>
-      </div>
-
-      <div id="meals"></div>
-      <button class="add-meal" onclick="addMeal()">+ Add a meal</button>
-    </div>
-
-  </div><!-- end dietApp -->
-
-  <!-- ============ WORKOUT TOOL ============ -->
-  <div id="workoutApp" class="hidden">
-
-    <!-- WORKOUT HOME: Ready Made vs Custom -->
-    <div id="woHome">
-      <div class="topbar">
-        <button class="ghost" onclick="gotoHome()">‹ Home</button>
-        <div class="brand" style="font-size:15px"><span class="dot"></span> Workout Plans</div>
-      </div>
-      <div class="wo-choice">
-        <div class="wo-choice-card" onclick="openReadyMade()">
-          <div class="icon">📋</div>
-          <div class="label">Ready Made</div>
-          <div class="sub">Pre-built programs with auto loads</div>
-        </div>
-        <div class="wo-choice-card" onclick="openCustom()">
-          <div class="icon">✏️</div>
-          <div class="label">Custom Plan</div>
-          <div class="sub">Build your own from scratch</div>
-        </div>
-        <div class="wo-choice-card" onclick="openWoAll()">
-          <div class="icon">🗂️</div>
-          <div class="label">Saved Plans</div>
-          <div class="sub">All plans, mixed, by date</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== SAVED PLANS (combined) SECTION ===== -->
-    <div id="woAllSection" class="hidden">
-      <div class="topbar">
-        <button class="ghost" onclick="backToWoHome()">‹ Workout</button>
-        <div class="brand" style="font-size:15px"><span class="dot"></span> Saved Plans</div>
-      </div>
-      <h2 style="margin-top:18px">All workout plans</h2>
-      <div id="woAllList"></div>
-    </div>
-
-    <!-- ===== READY MADE SECTION ===== -->
-    <div id="rmSection" class="hidden">
-
-      <!-- RM Library -->
-      <div id="rmLibView">
-        <div class="topbar">
-          <button class="ghost" onclick="backToWoHome()">‹ Workout</button>
-          <div class="brand" style="font-size:15px"><span class="dot"></span> Ready Made</div>
-        </div>
-        <button class="newbtn" onclick="showRmTemplates()">+ Assign a plan</button>
-        <h2 style="margin-top:18px">Assigned plans</h2>
-        <div id="rmPlanList"></div>
-      </div>
-
-      <!-- RM Template Browser -->
-      <div id="rmTemplates" class="hidden">
-        <div class="topbar">
-          <button class="ghost" onclick="rmShow('lib')">‹ Plans</button>
-          <div class="brand" style="font-size:15px"><span class="dot"></span> Choose Template</div>
-        </div>
-        <div id="rmTemplateList" style="margin-top:8px"></div>
-      </div>
-
-      <!-- RM Assign View -->
-      <div id="rmAssignView" class="hidden">
-        <div class="topbar">
-          <button class="ghost" onclick="rmShow('templates')">‹ Templates</button>
-          <div class="brand" style="font-size:15px"><span class="dot"></span> Assign Plan</div>
-        </div>
-        <div class="panel">
-          <div class="field">
-            <label>Link to a client account (optional)</label>
-            <select id="rmClientPicker" onchange="rmPickClient(this.value)">
-              <option value="">— none, just type a name below —</option>
-            </select>
-            <div class="tip">Linking lets your client log in and see/log this plan themselves.</div>
-          </div>
-          <div class="twocol" style="margin-top:13px">
-            <div class="field"><label>Client</label><input id="rmClient" placeholder="e.g. Ayesha" oninput="rmMarkDirty()"></div>
-            <div class="field"><label>Goal</label><input id="rmGoal" placeholder="e.g. Strength" oninput="rmMarkDirty()"></div>
-          </div>
-        </div>
-        <div class="injury-box">
-          <label>⚠ Injuries / Limitations / Pain</label>
-          <textarea id="rmInjury" placeholder="Note injuries, limitations, aches..." oninput="rmMarkDirty()"></textarea>
-        </div>
-        <div class="panel" style="margin-top:13px">
-          <h2>Client 1RM values (kg)</h2>
-          <div class="rm-1rm" id="rmInputs"></div>
-          <div class="tip">Enter 0 for any lift not being tracked — loads will show as "—"</div>
-        </div>
-        <div style="height:80px"></div>
-      </div>
-
-      <!-- RM Plan View -->
-      <div id="rmPlanView" class="hidden">
-        <div class="topbar">
-          <button class="ghost" onclick="rmPlanBack()">‹ Plans</button>
-          <div class="brand" style="font-size:14px" id="rmPlanTitle"><span class="dot"></span> Plan</div>
-        </div>
-        <div class="slot-tabs" id="rmSlotTabs"></div>
-        <div class="injury-box" id="rmViewInjury" style="display:none;margin-top:13px"></div>
-        <div class="panel" style="margin-top:13px">
-          <h2>Select week</h2>
-          <div class="week-tabs" id="rmWeekTabs"></div>
-        </div>
-        <div id="rmDays"></div>
-        <div style="height:80px"></div>
-      </div>
-
-    </div><!-- end rmSection -->
-
-    <!-- ===== CUSTOM SECTION ===== -->
-    <div id="customSection" class="hidden">
-
-      <!-- W LIBRARY -->
-      <div id="wLibView">
-        <div class="topbar">
-          <button class="ghost" onclick="backToWoHome()">‹ Workout</button>
-          <div class="brand" style="font-size:15px"><span class="dot"></span> Custom Plans</div>
-        </div>
-        <button class="newbtn" onclick="wNewPlan()">+ New plan</button>
-        <h2 style="margin-top:18px">Saved plans</h2>
-        <div id="wPlanList"></div>
-      </div>
-
-      <!-- W EDITOR -->
-      <div id="wEditView" class="hidden">
-        <div class="topbar">
-          <button class="ghost" onclick="wBackToLibrary()">‹ Plans</button>
-          <div class="brand" style="font-size:15px"><span class="dot"></span> Custom Plan</div>
-        </div>
-        <div class="panel">
-          <div class="twocol">
-            <div class="field"><label>Client</label><input id="wClient" placeholder="e.g. Ayesha" oninput="wMarkDirty()"></div>
-            <div class="field"><label>Goal</label><input id="wGoal" placeholder="e.g. Strength" oninput="wMarkDirty()"></div>
-          </div>
-        </div>
-        <div class="injury-box">
-          <label>⚠ Injuries / Limitations / Pain</label>
-          <textarea id="wInjury" placeholder="Note any injuries, limitations, aches or restrictions here..." oninput="wMarkDirty()"></textarea>
-        </div>
-        <div class="panel" style="margin-top:13px">
-          <h2>Exercises</h2>
-          <div style="display:grid;grid-template-columns:1fr 52px 52px 52px 52px auto;gap:6px;margin-bottom:4px">
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:600">Exercise</div>
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:600;text-align:center">Sets</div>
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:600;text-align:center">Reps</div>
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:600;text-align:center">Weight</div>
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:600;text-align:center">Rest</div>
-            <div></div>
-          </div>
-          <div id="wExList"></div>
-          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-            <button class="add-food" onclick="wAddEx(null)">+ Exercise</button>
-            <button class="add-food" style="background:#e8d5f7;color:#6b2fa0" onclick="wAddGroup('superset')">+ Superset</button>
-            <button class="add-food" style="background:#d5e8f7;color:#1a5fa0" onclick="wAddGroup('triset')">+ Triset</button>
-            <button class="add-food" style="background:#d5f7e8;color:#1a7a40" onclick="wAddGroup('giantset')">+ Giant Set</button>
-          </div>
-        </div>
-        <div style="height:80px"></div>
-      </div>
-
-    </div><!-- end customSection -->
-
-  </div><!-- end workoutApp -->
-
-</div>
-
-<div class="actionbar hidden" id="actionbar">
-  <button class="btn-save" onclick="savePlan()">Save plan</button>
-  <button class="btn-pdf" onclick="exportPDF()">Save as PDF</button>
-</div>
-
-<div class="actionbar hidden" id="wActionbar">
-  <button class="w-btn-save" style="background:var(--teal);color:#fff" onclick="wSavePlan()">Save plan</button>
-  <button class="w-btn-pdf" style="background:#25803a;color:#fff" onclick="wExportPDF()">Save as PDF</button>
-</div>
-
-<div class="actionbar hidden" id="rmAssignBar">
-  <button style="background:var(--teal);color:#fff" onclick="rmSaveAssign()">Save &amp; View Plan</button>
-</div>
-
-<div class="actionbar hidden" id="rmPlanBar">
-  <button class="rm-btn-save" style="background:var(--teal);color:#fff" onclick="rmSavePlan()">Save</button>
-  <button class="rm-btn-pdf" style="background:#25803a;color:#fff" onclick="rmExportPDF()">Save as PDF</button>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script src="app.js"></script>
-</body>
-</html>
+  /* READY MADE PLANS */
+  .wo-choice{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:16px}
+  .wo-choice-card{background:var(--white);border:1px solid var(--line);border-radius:16px;
+    padding:20px 14px;text-align:center;cursor:pointer;transition:box-shadow .15s}
+  .wo-choice-card:active{transform:translateY(1px)}
+  .wo-choice-card .icon{font-size:30px;margin-bottom:9px}
+  .wo-choice-card .label{font-weight:800;font-size:14px;color:var(--teal)}
+  .wo-choice-card .sub{font-size:11px;color:#7e9197;margin-top:3px}
+  .tpl-card{background:var(--white);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;margin-top:11px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .tpl-card:active{background:#f0f6f7}
+  .tpl-card .tname{font-weight:700;font-size:15px}
+  .tpl-card .ttag{display:inline-block;background:var(--amber-soft);color:var(--amber-ink);
+    font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;margin-top:4px}
+  .tpl-card .tdesc{font-size:12px;color:#7e9197;margin-top:4px}
+  .rm-1rm{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  .rm-1rm .tbox input{font-size:15px}
+  .week-tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;-webkit-overflow-scrolling:touch}
+  .week-tabs::-webkit-scrollbar{display:none}
+  .wtab{flex:none;padding:7px 12px;border-radius:20px;border:1.5px solid var(--line);
+    background:#fff;font-size:13px;font-weight:700;color:#7e9197;cursor:pointer}
+  .wtab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .slot-tabs{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap;align-items:center}
+  .slot-tab-wrap{display:flex;align-items:center;gap:4px}
+  .slot-tab{padding:8px 14px;border-radius:20px;border:1.5px solid var(--line);background:#fff;
+    font-size:13px;font-weight:700;color:#7e9197;cursor:pointer}
+  .slot-tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .slot-tab.empty{border-style:dashed;color:var(--teal-2)}
+  .slot-change{background:var(--mist);border:none;border-radius:8px;width:28px;height:28px;
+    font-size:13px;cursor:pointer;color:var(--teal-2);flex:none}
+  .day-card{background:var(--white);border:1px solid var(--line);border-radius:13px;margin-top:11px;overflow:hidden}
+  .day-head{background:var(--teal);color:#fff;padding:9px 13px;font-weight:700;font-size:14px}
+  .ex-row-rm{padding:10px 12px;border-bottom:1px solid var(--mist)}
+  .ex-row-rm:last-of-type{border-bottom:none}
+  .ex-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .ex-name{font-size:14px;font-weight:700;flex:1}
+  .ex-warmup{font-size:10px;color:var(--amber-ink);background:var(--amber-soft);
+    padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap;margin-top:2px}
+  .ex-detail{font-size:11.5px;color:#7e9197;margin-top:3px}
+  .ex-target{font-size:12px;font-weight:700;color:var(--teal);margin-top:2px}
+  .ex-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .ex-input-wrap .ilbl{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:600;margin-bottom:3px}
+  .ex-input-wrap input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;
+    font-size:15px;font-weight:700;color:var(--ink);background:#fff;text-align:center}
+  .ex-input-wrap input:focus{border-color:var(--teal-2);outline:none}
+  .acc-block{background:#f6f9fa;border-top:1px dashed var(--line)}
+  .acc-row{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:7px}
+  .acc-row:last-of-type{border-bottom:none}
+  .acc-name-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+  .acc-name-row input{padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;width:100%}
+  .acc-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .acc-fields input{padding:8px 6px;border:1px solid var(--line);border-radius:9px;font-size:13px;font-weight:600;background:#fff;width:100%;text-align:center}
+  .acc-flbl{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:600;text-align:center;margin-bottom:3px}
+  .btn-add-acc{margin:8px 12px 10px;background:var(--amber-soft);color:var(--amber-ink);
+    border:none;padding:8px 13px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;display:block}
+  .rm-btn-save{background:var(--teal);color:#fff}
+  .rm-btn-pdf{background:#25803a;color:#fff}
+  .injury-box{background:#fff5f5;border:1.5px solid #f5c2c2;border-radius:12px;padding:12px;margin-top:13px}
+  .injury-box label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+    color:#c0392b;font-weight:700;margin-bottom:6px}
+  .injury-box textarea{width:100%;border:none;background:transparent;font-size:14px;
+    color:#7b1717;resize:vertical;min-height:60px;font-family:inherit;line-height:1.5}
+  .injury-box textarea:focus{outline:none}
+  .exrow{display:grid;grid-template-columns:1fr 52px 52px 52px 52px auto;gap:6px;align-items:start;padding:7px 0;
+    border-bottom:1px solid var(--mist)}
+  .exrow:last-of-type{border-bottom:none}
+  .exrow input{padding:9px 8px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:#fff;width:100%}
+  .exrow .col-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);
+    text-align:center;margin-bottom:3px;font-weight:600}
+  .ex-notes{grid-column:1/-1;margin-top:2px}
+  .ex-notes input{font-size:12px;color:#7e9197}
+  /* WORKOUT SESSION */
+  .day-head{background:var(--teal);color:#fff;padding:9px 13px;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:space-between}
+  .day-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.4px}
+  .day-status.done{background:#2f8f5b;color:#fff}
+  .day-status.active{background:var(--amber);color:#fff}
+  .start-btn{width:calc(100% - 24px);margin:10px 12px 12px;background:var(--teal);color:#fff;
+    border:none;padding:13px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .start-btn:active{background:#163b47}
+  .complete-btn{width:calc(100% - 24px);margin:10px 12px 12px;background:#2f8f5b;color:#fff;
+    border:none;padding:13px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .complete-btn:active{background:#1c6630}
+  /* PER-SET LOGGING */
+  .ex-block{border-bottom:1px solid var(--mist)}
+  .ex-block:last-of-type{border-bottom:none}
+  .ex-header{padding:10px 12px 4px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .ex-header .ex-name{font-size:14px;font-weight:700}
+  .ex-header .ex-detail{font-size:11px;color:#7e9197;margin-top:2px}
+  .ex-header .ex-target{font-size:12px;color:var(--teal);font-weight:700;margin-top:2px}
+  .progress-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:2px 4px;opacity:.6}
+  .progress-btn:hover{opacity:1}
+  .set-headers{display:grid;grid-template-columns:44px 1fr 1fr 36px;gap:6px;padding:4px 12px;
+    font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:600}
+  .set-row{display:grid;grid-template-columns:44px 1fr 1fr 36px;gap:6px;padding:5px 12px;align-items:center}
+  .set-row.set-done{background:#f0faf5}
+  .set-num{font-size:12px;font-weight:700;color:#7e9197}
+  .set-row.set-done .set-num{color:var(--good)}
+  .set-input{border:1.5px solid var(--line);border-radius:9px;padding:8px 4px;font-size:14px;
+    font-weight:700;text-align:center;background:#fff;width:100%}
+  .set-input:focus{border-color:var(--teal-2);outline:none}
+  .set-row.set-done .set-input{background:#f0faf5;border-color:#b8e0cb;color:var(--good)}
+  .set-check{width:32px;height:32px;border-radius:50%;border:2px solid var(--line);background:#fff;
+    font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+  .set-check.checked{background:var(--good);border-color:var(--good);color:#fff}
+  .set-spacer{height:8px}
+  /* SUPERSET BRACKET */
+  .ss-group{position:relative;padding-left:14px;margin:0}
+  .ss-label-row{padding:6px 12px 2px 14px;display:flex;align-items:center;gap:8px}
+  .ss-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;
+    padding:2px 8px;border-radius:8px}
+  .ss-superset{background:#e8d5f7;color:#6b2fa0}
+  .ss-triset{background:#d5e8f7;color:#1a5fa0}
+  .ss-giantset{background:#d5f7e8;color:#1a7a40}
+  .ss-bracket{position:absolute;left:4px;top:0;bottom:0;width:4px;border-radius:4px}
+  .ss-superset-br{background:#9b59b6}
+  .ss-triset-br{background:#2980b9}
+  .ss-giantset-br{background:#27ae60}
+  /* COMPLETION BANNER */
+  .complete-banner{background:#f0faf5;border:1.5px solid #b8e0cb;border-radius:13px;
+    padding:14px 16px;margin-top:11px;text-align:center}
+  .complete-banner .big{font-size:24px;margin-bottom:6px}
+  .complete-banner .msg{font-weight:700;color:var(--good);font-size:15px}
+  .complete-banner .sub{font-size:12px;color:#7e9197;margin-top:3px}
+  .next-btn{margin-top:10px;background:var(--teal);color:#fff;border:none;padding:11px 20px;
+    border-radius:11px;font-weight:700;font-size:14px;cursor:pointer}
+  /* PROGRESS OVERLAY */
+  .prog-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;
+    display:flex;align-items:flex-end;justify-content:center}
+  .prog-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;
+    padding:20px 16px 36px;max-height:70vh;overflow-y:auto}
+  .prog-sheet h3{font-size:15px;font-weight:800;margin-bottom:4px}
+  .prog-sheet .prog-sub{font-size:12px;color:#7e9197;margin-bottom:16px}
+  .prog-close{float:right;background:var(--mist);border:none;border-radius:50%;width:30px;height:30px;
+    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  /* ADD SUPERSET BUTTONS */
+  .acc-add-row{display:flex;gap:8px;padding:8px 12px 10px;flex-wrap:wrap}
+  .acc-add-btn{flex:1;min-width:100px;padding:8px 10px;border-radius:10px;border:none;
+    font-size:12px;font-weight:700;cursor:pointer}
+  .acc-add-normal{background:var(--amber-soft);color:var(--amber-ink)}
+  .acc-add-ss{background:#e8d5f7;color:#6b2fa0}
+  .acc-add-tri{background:#d5e8f7;color:#1a5fa0}
+  /* PROGRESS TRACKING (measurements + photos) */
+  .prog-chart-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:13px}
+  .prog-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .prog-stat{background:var(--mist);border-radius:10px;padding:10px;text-align:center}
+  .prog-stat .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:700}
+  .prog-stat .val{font-size:16px;font-weight:800;color:var(--ink);margin-top:2px}
+  .prog-stat .trend{font-size:10.5px;font-weight:700;margin-top:2px}
+  .trend-up{color:#c0492f}
+  .trend-down{color:#2f8f5b}
+  .trend-flat{color:#90a3a8}
+  .prog-entry-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-top:11px}
+  .prog-entry-date{font-weight:700;font-size:14px;color:var(--teal)}
+  .prog-entry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px;margin-top:8px}
+  .prog-entry-grid .m{background:var(--mist);border-radius:8px;padding:6px;text-align:center}
+  .prog-entry-grid .m .l{font-size:9px;text-transform:uppercase;color:var(--teal-2);font-weight:700}
+  .prog-entry-grid .m .v{font-size:13px;font-weight:700;margin-top:1px}
+  .prog-log-btn{width:100%;margin-top:13px;background:var(--teal);color:#fff;border:none;padding:13px;
+    border-radius:12px;font-weight:700;font-size:14px;cursor:pointer}
+  /* FOOD LOG (free-text, AI-matched) */
+  .fl-textarea{width:100%;min-height:80px;padding:12px;border-radius:12px;border:1px solid var(--line);
+    font-size:15px;font-family:inherit;resize:vertical}
+  .fl-review-card{background:#fff5f5;border:1.5px solid #f5c2c2;border-radius:12px;padding:12px;margin-top:11px}
+  .fl-review-card .raw{font-size:13px;color:#7b1717;font-weight:600;margin-bottom:8px}
+  .fl-candidates{display:flex;flex-wrap:wrap;gap:8px}
+  .fl-log-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--mist)}
+  .fl-log-row:last-of-type{border-bottom:none}
+  .fl-log-row .name{font-size:14px;font-weight:600}
+  .fl-log-row .qty{font-size:12px;color:#7e9197}
+  .fl-log-row .mac{font-size:12px;color:var(--teal-2);text-align:right;white-space:nowrap}
+  .fl-totals-bar{display:flex;justify-content:space-around;background:var(--mist);border-radius:12px;padding:11px;margin-top:11px}
+  .fl-totals-bar .t{text-align:center}
+  .fl-totals-bar .t .v{font-size:15px;font-weight:800;color:var(--ink)}
+  .fl-totals-bar .t .l{font-size:9.5px;text-transform:uppercase;color:var(--teal-2);font-weight:700}
