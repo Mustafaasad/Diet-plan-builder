@@ -982,6 +982,7 @@ function gotoClientHome(){
   document.getElementById("progressLogView").classList.add("hidden");
   document.getElementById("foodLogView").classList.add("hidden");
   document.getElementById("photoWorkoutView").classList.add("hidden");
+  document.getElementById("photoFoodView").classList.add("hidden");
   document.getElementById("actionbar").classList.add("hidden");
   document.getElementById("wActionbar").classList.add("hidden");
   document.getElementById("rmAssignBar").classList.add("hidden");
@@ -1002,6 +1003,7 @@ function gotoHome(){
   document.getElementById("progressLogView").classList.add("hidden");
   document.getElementById("foodLogView").classList.add("hidden");
   document.getElementById("photoWorkoutView").classList.add("hidden");
+  document.getElementById("photoFoodView").classList.add("hidden");
   document.getElementById("homeView").classList.remove("hidden");
   document.getElementById("dietApp").classList.add("hidden");
   document.getElementById("workoutApp").classList.add("hidden");
@@ -1070,6 +1072,7 @@ async function openClientProfile(id,kind){
     document.getElementById("clientProfileProgressBtn").onclick=()=>openProgressView(kind,id,c.full_name);
     document.getElementById("clientProfileFoodLogBtn").onclick=()=>openFoodLogView(kind,id,c.full_name);
     document.getElementById("clientProfilePhotoWorkoutBtn").onclick=()=>openPhotoWorkoutView(kind,id,c.full_name);
+    document.getElementById("clientProfilePhotoFoodBtn").onclick=()=>openPhotoFoodView(kind,id,c.full_name);
     if(!c.onboarding_completed||!c.onboarding){
       body.innerHTML=kind==="gym"
         ?'<div class="empty">No onboarding info yet for this client.</div>'
@@ -1495,8 +1498,8 @@ async function renderTodayFoodLog(){
     totalsBar.innerHTML=MACROS.map((m,i)=>`<div class="t"><div class="v">${i===3?r0(totals[i]):r1(totals[i])}</div><div class="l">${m}</div></div>`).join("");
     list.innerHTML=allItems.map(it=>`
       <div class="fl-log-row">
-        <div><div class="name">${esc(it.food)}</div><div class="qty">${it.qty} ${byName[it.food]?byName[it.food].unit:""}</div></div>
-        <div class="mac">${r0(it.cal)} kcal<br>${r1(it.p)}p·${r1(it.c)}c·${r1(it.fat)}f</div>
+        <div><div class="name">${esc(it.food)}${it.estimated?' <span style="font-size:9px;color:var(--amber-ink);background:var(--amber-soft);padding:1px 6px;border-radius:8px;font-weight:700">EST.</span>':""}</div><div class="qty">${it.qty} ${byName[it.food]?byName[it.food].unit:""}</div></div>
+        <div class="mac">${it.estimated&&it.calRange?it.calRange[0]+"–"+it.calRange[1]:r0(it.cal)} kcal<br>${r1(it.p)}p·${r1(it.c)}c·${r1(it.fat)}f</div>
       </div>`).join("");
   }catch(e){
     console.error("renderTodayFoodLog failed:",e);
@@ -1602,6 +1605,138 @@ async function parseWorkoutPhoto(){
     errEl.textContent="Couldn't parse that photo — try again";
     errEl.classList.remove("hidden");
     btn.disabled=false; btn.textContent="Parse Photo";
+  }
+}
+
+/* ====================== LOG FOOD FROM PHOTO (AI estimate — ranges, not fake precision) ====================== */
+let photoFoodCtx={kind:"online",id:null,trainerId:null,label:""};
+let photoFoodOpenedFromClientProfile=false;
+let pfSelectedFile=null;
+let pfReviewItems=[]; // [{name, portionEstimate, calMin,calMax, proteinMin,proteinMax, carbMin,carbMax, fatMin,fatMax}]
+
+function openPhotoFoodView(kind,id,label){
+  photoFoodOpenedFromClientProfile = !(kind==="online" && id===null);
+  if(kind==="online" && id===null){
+    photoFoodCtx={kind:"online", id:currentUser.id, trainerId:currentProfile.trainer_id||null, label:currentProfile.full_name||"You"};
+  } else {
+    photoFoodCtx={kind, id, trainerId:currentUser.id, label:label||"Client"};
+  }
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("dietApp").classList.add("hidden");
+  document.getElementById("workoutApp").classList.add("hidden");
+  document.getElementById("clientHomeView").classList.add("hidden");
+  document.getElementById("clientsListView").classList.add("hidden");
+  document.getElementById("clientProfileView").classList.add("hidden");
+  document.getElementById("progressView").classList.add("hidden");
+  document.getElementById("foodLogView").classList.add("hidden");
+  document.getElementById("photoWorkoutView").classList.add("hidden");
+  document.getElementById("photoFoodView").classList.remove("hidden");
+  document.getElementById("photoFoodTitle").innerHTML=`<span class="dot"></span> ${esc(photoFoodCtx.label)}'s Food Photo`;
+  document.getElementById("pfPhotoInput").value="";
+  document.getElementById("pfPreviewWrap").innerHTML="";
+  document.getElementById("pfNotes").value="";
+  document.getElementById("pfError").classList.add("hidden");
+  document.getElementById("pfParseBtn").disabled=true;
+  document.getElementById("pfReviewSection").classList.add("hidden");
+  pfSelectedFile=null; pfReviewItems=[];
+  window.scrollTo(0,0);
+}
+function backFromPhotoFoodView(){
+  document.getElementById("photoFoodView").classList.add("hidden");
+  if(photoFoodOpenedFromClientProfile){
+    document.getElementById("clientProfileView").classList.remove("hidden");
+  } else {
+    document.getElementById("clientHomeView").classList.remove("hidden");
+  }
+}
+function handleFoodPhotoSelect(event){
+  const file=event.target.files&&event.target.files[0];
+  if(!file) return;
+  pfSelectedFile=file;
+  const url=URL.createObjectURL(file);
+  document.getElementById("pfPreviewWrap").innerHTML=`<img class="pw-preview" src="${url}">`;
+  document.getElementById("pfParseBtn").disabled=false;
+}
+async function parseFoodPhoto(){
+  const errEl=document.getElementById("pfError");
+  if(!pfSelectedFile){ errEl.textContent="Choose a photo first"; errEl.classList.remove("hidden"); return; }
+  errEl.classList.add("hidden");
+  const btn=document.getElementById("pfParseBtn"); btn.disabled=true; btn.textContent="Estimating...";
+  try{
+    const imageBase64=await fileToBase64(pfSelectedFile);
+    const notes=document.getElementById("pfNotes").value.trim();
+    const {data,error}=await sb.functions.invoke("estimate-meal-photo",{
+      body:{ imageBase64, mimeType: pfSelectedFile.type||"image/jpeg", notes }
+    });
+    if(error) throw error;
+    if(data.error) throw new Error(data.error);
+    pfReviewItems=(data.items||[]).map(it=>({
+      name: it.name||"Food item",
+      portionEstimate: it.portionEstimate||"",
+      calMin: it.calMin||0, calMax: it.calMax||0,
+      proteinMin: it.proteinMin||0, proteinMax: it.proteinMax||0,
+      carbMin: it.carbMin||0, carbMax: it.carbMax||0,
+      fatMin: it.fatMin||0, fatMax: it.fatMax||0
+    }));
+    if(!pfReviewItems.length){
+      errEl.textContent="Couldn't identify food in that photo — try adding more detail in the notes";
+      errEl.classList.remove("hidden");
+      btn.disabled=false; btn.textContent="Estimate Calories";
+      return;
+    }
+    renderPfReview();
+  }catch(e){
+    console.error("parseFoodPhoto failed:",e);
+    errEl.textContent="Couldn't estimate that photo — try again";
+    errEl.classList.remove("hidden");
+  }
+  btn.disabled=false; btn.textContent="Estimate Calories";
+}
+function renderPfReview(){
+  const section=document.getElementById("pfReviewSection");
+  const list=document.getElementById("pfReviewList");
+  if(!pfReviewItems.length){ section.classList.add("hidden"); return; }
+  section.classList.remove("hidden");
+  list.innerHTML=pfReviewItems.map((it,i)=>`
+    <div class="pf-item-card">
+      <input class="name" value="${esc(it.name)}" oninput="pfSetField(${i},'name',this.value)">
+      <div class="pf-range-detail">${esc(it.portionEstimate)}</div>
+      <div class="pf-range" style="margin-top:6px">${it.calMin}–${it.calMax} kcal</div>
+      <div class="pf-range-detail">${it.proteinMin}-${it.proteinMax}g protein · ${it.carbMin}-${it.carbMax}g carbs · ${it.fatMin}-${it.fatMax}g fat</div>
+    </div>`).join("");
+  const totalMin=pfReviewItems.reduce((a,it)=>a+it.calMin,0);
+  const totalMax=pfReviewItems.reduce((a,it)=>a+it.calMax,0);
+  document.getElementById("pfMealTotal").innerHTML=`<div class="v">${totalMin}–${totalMax} kcal</div><div class="l">Estimated total for this meal</div>`;
+}
+function pfSetField(i,field,val){ pfReviewItems[i][field]=val; }
+
+async function confirmAndSavePhotoFood(){
+  if(!pfReviewItems.length) return;
+  const items=pfReviewItems.map(it=>{
+    const calMid=(it.calMin+it.calMax)/2, pMid=(it.proteinMin+it.proteinMax)/2,
+          cMid=(it.carbMin+it.carbMax)/2, fMid=(it.fatMin+it.fatMax)/2;
+    return {
+      food: it.name, qty: it.portionEstimate||"1 serving (estimated)",
+      p:+pMid.toFixed(1), c:+cMid.toFixed(1), fat:+fMid.toFixed(1), cal:+calMid.toFixed(0),
+      estimated:true, calRange:[it.calMin,it.calMax]
+    };
+  });
+  try{
+    const row={
+      trainer_id: photoFoodCtx.trainerId,
+      client_kind: photoFoodCtx.kind,
+      client_id: photoFoodCtx.id,
+      logged_at: new Date().toISOString().slice(0,10),
+      raw_text: document.getElementById("pfNotes").value.trim()||"(from photo)",
+      items
+    };
+    const {error}=await sb.from("food_logs").insert(row);
+    if(error) throw error;
+    toast("Logged!");
+    backFromPhotoFoodView();
+  }catch(e){
+    console.error("confirmAndSavePhotoFood failed:",e);
+    toast("Couldn't save — try again");
   }
 }
 
