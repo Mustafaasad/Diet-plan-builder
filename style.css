@@ -327,3 +327,21 @@
   .acc-add-normal{background:var(--amber-soft);color:var(--amber-ink)}
   .acc-add-ss{background:#e8d5f7;color:#6b2fa0}
   .acc-add-tri{background:#d5e8f7;color:#1a5fa0}
+  /* PROGRESS TRACKING (measurements + photos) */
+  .prog-chart-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:13px}
+  .prog-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .prog-stat{background:var(--mist);border-radius:10px;padding:10px;text-align:center}
+  .prog-stat .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--teal-2);font-weight:700}
+  .prog-stat .val{font-size:16px;font-weight:800;color:var(--ink);margin-top:2px}
+  .prog-stat .trend{font-size:10.5px;font-weight:700;margin-top:2px}
+  .trend-up{color:#c0492f}
+  .trend-down{color:#2f8f5b}
+  .trend-flat{color:#90a3a8}
+  .prog-entry-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-top:11px}
+  .prog-entry-date{font-weight:700;font-size:14px;color:var(--teal)}
+  .prog-entry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px;margin-top:8px}
+  .prog-entry-grid .m{background:var(--mist);border-radius:8px;padding:6px;text-align:center}
+  .prog-entry-grid .m .l{font-size:9px;text-transform:uppercase;color:var(--teal-2);font-weight:700}
+  .prog-entry-grid .m .v{font-size:13px;font-weight:700;margin-top:1px}
+  .prog-log-btn{width:100%;margin-top:13px;background:var(--teal);color:#fff;border:none;padding:13px;
+    border-radius:12px;font-weight:700;font-size:14px;cursor:pointer}
