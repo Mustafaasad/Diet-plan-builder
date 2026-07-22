@@ -972,6 +972,7 @@ function gotoClientHome(){
   document.getElementById("workoutApp").classList.add("hidden");
   document.getElementById("progressView").classList.add("hidden");
   document.getElementById("progressLogView").classList.add("hidden");
+  document.getElementById("foodLogView").classList.add("hidden");
   document.getElementById("actionbar").classList.add("hidden");
   document.getElementById("wActionbar").classList.add("hidden");
   document.getElementById("rmAssignBar").classList.add("hidden");
@@ -990,6 +991,7 @@ function gotoHome(){
   document.getElementById("formBuilderView").classList.add("hidden");
   document.getElementById("progressView").classList.add("hidden");
   document.getElementById("progressLogView").classList.add("hidden");
+  document.getElementById("foodLogView").classList.add("hidden");
   document.getElementById("homeView").classList.remove("hidden");
   document.getElementById("dietApp").classList.add("hidden");
   document.getElementById("workoutApp").classList.add("hidden");
@@ -1056,6 +1058,7 @@ async function openClientProfile(id,kind){
     if(error) throw error;
     document.getElementById("clientProfileTitle").innerHTML=`<span class="dot"></span> ${esc(c.full_name)||"Client"}`;
     document.getElementById("clientProfileProgressBtn").onclick=()=>openProgressView(kind,id,c.full_name);
+    document.getElementById("clientProfileFoodLogBtn").onclick=()=>openFoodLogView(kind,id,c.full_name);
     if(!c.onboarding_completed||!c.onboarding){
       body.innerHTML=kind==="gym"
         ?'<div class="empty">No onboarding info yet for this client.</div>'
@@ -1333,6 +1336,161 @@ async function downloadProgressReport(){
 
   const date=new Date().toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"});
   mmPDFOpen(mmPDFShell(`${progressCtx.label} – Progress Report`,"Progress Report",progressCtx.label,"",date,bodyHTML,"Keep up the consistency — small changes compound over time."));
+}
+
+/* ====================== FOOD LOG (free-text, AI-matched via Edge Function) ====================== */
+let foodLogCtx={kind:"online",id:null,trainerId:null,label:""};
+let foodLogOpenedFromClientProfile=false;
+let flReviewItems=[]; // [{rawText, qty, food, candidates, confidence}]
+
+function openFoodLogView(kind,id,label){
+  foodLogOpenedFromClientProfile = !(kind==="online" && id===null);
+  if(kind==="online" && id===null){
+    foodLogCtx={kind:"online", id:currentUser.id, trainerId:currentProfile.trainer_id||null, label:currentProfile.full_name||"You"};
+  } else {
+    foodLogCtx={kind, id, trainerId:currentUser.id, label:label||"Client"};
+  }
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("dietApp").classList.add("hidden");
+  document.getElementById("workoutApp").classList.add("hidden");
+  document.getElementById("clientHomeView").classList.add("hidden");
+  document.getElementById("clientsListView").classList.add("hidden");
+  document.getElementById("clientProfileView").classList.add("hidden");
+  document.getElementById("progressView").classList.add("hidden");
+  document.getElementById("foodLogView").classList.remove("hidden");
+  document.getElementById("foodLogTitle").innerHTML=`<span class="dot"></span> ${esc(foodLogCtx.label)}'s Food Log`;
+  document.getElementById("flText").value="";
+  document.getElementById("flError").classList.add("hidden");
+  document.getElementById("flReviewSection").classList.add("hidden");
+  flReviewItems=[];
+  fillFoodDatalist();
+  renderTodayFoodLog();
+  window.scrollTo(0,0);
+}
+function backFromFoodLogView(){
+  document.getElementById("foodLogView").classList.add("hidden");
+  if(foodLogOpenedFromClientProfile){
+    document.getElementById("clientProfileView").classList.remove("hidden");
+  } else {
+    document.getElementById("clientHomeView").classList.remove("hidden");
+  }
+}
+
+async function parseFoodLogText(){
+  const text=document.getElementById("flText").value.trim();
+  const errEl=document.getElementById("flError");
+  if(!text){ errEl.textContent="Type what you ate first"; errEl.classList.remove("hidden"); return; }
+  errEl.classList.add("hidden");
+  const btn=document.getElementById("flParseBtn"); btn.disabled=true; btn.textContent="Parsing...";
+  try{
+    const {data,error}=await sb.functions.invoke("parse-food-log",{body:{text, foodNames: FOODS.map(f=>f.name)}});
+    if(error) throw error;
+    if(data.error) throw new Error(data.error);
+    flReviewItems=(data.items||[]).map(it=>({
+      rawText: it.rawText||text,
+      qty: it.qty||1,
+      food: (it.confidence==="high" && it.matchedFood && byName[it.matchedFood]) ? it.matchedFood : null,
+      candidates: (it.candidates||[]).filter(c=>byName[c]),
+      confidence: it.confidence||"low"
+    }));
+    if(!flReviewItems.length){ errEl.textContent="Couldn't find any food items in that — try rewording"; errEl.classList.remove("hidden"); }
+    renderFlReview();
+  }catch(e){
+    console.error("parseFoodLogText failed:",e);
+    errEl.textContent="Couldn't parse that — try again"; errEl.classList.remove("hidden");
+  }
+  btn.disabled=false; btn.textContent="Parse & Log";
+}
+
+function renderFlReview(){
+  const section=document.getElementById("flReviewSection");
+  const list=document.getElementById("flReviewList");
+  if(!flReviewItems.length){ section.classList.add("hidden"); return; }
+  section.classList.remove("hidden");
+  list.innerHTML=flReviewItems.map((it,i)=>{
+    if(it.food){
+      const f=byName[it.food];
+      return `<div class="fl-review-card" style="background:#fff;border-color:var(--line)">
+        <div style="font-size:13px;color:#7e9197;margin-bottom:8px">"${esc(it.rawText)}"</div>
+        <div class="frow" style="grid-template-columns:1fr 72px">
+          <input list="foodDatalist" value="${esc(it.food)}" oninput="flSetItemFood(${i},this.value)">
+          <input type="number" value="${it.qty}" oninput="flSetItemQty(${i},this.value)">
+        </div>
+        <div class="tip">${f?f.unit:""} · will log as-is</div>
+      </div>`;
+    }
+    return `<div class="fl-review-card">
+      <div class="raw">Couldn't confidently match: "${esc(it.rawText)}"</div>
+      <div class="fl-candidates">
+        ${it.candidates.map(c=>`<button type="button" class="ob-chip" onclick="flResolveCandidate(${i},'${c.replace(/'/g,"\\'")}')">${esc(c)}</button>`).join("")}
+      </div>
+      <div style="margin-top:8px">
+        <input list="foodDatalist" placeholder="Or search manually..." oninput="flSetItemFood(${i},this.value)">
+      </div>
+    </div>`;
+  }).join("");
+}
+function flSetItemFood(i,val){ flReviewItems[i].food=val||null; }
+function flSetItemQty(i,val){ flReviewItems[i].qty=parseFloat(val)||1; }
+function flResolveCandidate(i,name){ flReviewItems[i].food=name; renderFlReview(); }
+
+async function confirmAndSaveFoodLog(){
+  const unresolved=flReviewItems.filter(it=>!it.food || !byName[it.food]);
+  if(unresolved.length){ toast("Please match every item to a food first"); return; }
+  const items=flReviewItems.map(it=>{
+    const f=byName[it.food], q=it.qty||1;
+    return { food:it.food, qty:q, p:+(f.p*q).toFixed(1), c:+(f.c*q).toFixed(1), fat:+(f.fat*q).toFixed(1), cal:+(f.cal*q).toFixed(0) };
+  });
+  try{
+    const row={
+      trainer_id: foodLogCtx.trainerId,
+      client_kind: foodLogCtx.kind,
+      client_id: foodLogCtx.id,
+      logged_at: new Date().toISOString().slice(0,10),
+      raw_text: document.getElementById("flText").value.trim(),
+      items
+    };
+    const {error}=await sb.from("food_logs").insert(row);
+    if(error) throw error;
+    toast("Logged!");
+    document.getElementById("flText").value="";
+    document.getElementById("flReviewSection").classList.add("hidden");
+    flReviewItems=[];
+    renderTodayFoodLog();
+  }catch(e){
+    console.error("confirmAndSaveFoodLog failed:",e);
+    toast("Couldn't save — try again");
+  }
+}
+
+async function renderTodayFoodLog(){
+  const totalsBar=document.getElementById("flTotalsBar");
+  const list=document.getElementById("flTodayList");
+  totalsBar.innerHTML=""; list.innerHTML='<div class="empty">Loading...</div>';
+  try{
+    const today=new Date().toISOString().slice(0,10);
+    const {data,error}=await sb.from("food_logs").select("*")
+      .eq("client_kind",foodLogCtx.kind).eq("client_id",foodLogCtx.id).eq("logged_at",today)
+      .order("created_at",{ascending:true});
+    if(error) throw error;
+    const rows=data||[];
+    const allItems=rows.flatMap(r=>r.items||[]);
+    if(!allItems.length){
+      totalsBar.innerHTML="";
+      list.innerHTML='<div class="empty">Nothing logged today yet.</div>';
+      return;
+    }
+    const totals=allItems.reduce((a,it)=>[a[0]+(it.p||0),a[1]+(it.c||0),a[2]+(it.fat||0),a[3]+(it.cal||0)],[0,0,0,0]);
+    totalsBar.innerHTML=MACROS.map((m,i)=>`<div class="t"><div class="v">${i===3?r0(totals[i]):r1(totals[i])}</div><div class="l">${m}</div></div>`).join("");
+    list.innerHTML=allItems.map(it=>`
+      <div class="fl-log-row">
+        <div><div class="name">${esc(it.food)}</div><div class="qty">${it.qty} ${byName[it.food]?byName[it.food].unit:""}</div></div>
+        <div class="mac">${r0(it.cal)} kcal<br>${r1(it.p)}p·${r1(it.c)}c·${r1(it.fat)}f</div>
+      </div>`).join("");
+  }catch(e){
+    console.error("renderTodayFoodLog failed:",e);
+    list.innerHTML='<div class="empty">Couldn\'t load today\'s log.</div>';
+  }
 }
 
 function openDiet(){ 
