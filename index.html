@@ -102,6 +102,7 @@
     <div id="clientTrainerLine" style="font-size:12.5px;color:#7e9197;margin-top:10px;display:flex;align-items:center;gap:6px"></div>
     <button class="newbtn" style="background:var(--teal)" onclick="clientGenerateMyPlan()">✨ Generate My Plan</button>
     <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openProgressView('online',null)">📈 My Progress</button>
+    <button class="newbtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)" onclick="openFoodLogView('online',null)">🍽️ Log Food</button>
     <h2 style="margin-top:18px">Your assigned plans</h2>
     <div id="clientPlanList"></div>
   </div>
@@ -175,6 +176,7 @@
     </div>
     <button class="newbtn hidden" id="clientProfileGenerateBtn" style="background:var(--teal)">✨ Auto-Generate Plan For This Client</button>
     <button class="newbtn" id="clientProfileProgressBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">📈 View Progress</button>
+    <button class="newbtn" id="clientProfileFoodLogBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">🍽️ Food Log</button>
     <button class="newbtn hidden" id="clientProfileEditBtn" style="background:#fff;color:var(--teal);border:1.5px solid var(--line)">Edit Onboarding Info</button>
     <div class="panel" style="margin-top:13px">
       <h2>Onboarding info</h2>
@@ -223,6 +225,31 @@
       <div id="plError" class="auth-error hidden"></div>
       <button class="ob-submit" id="plSubmitBtn" onclick="submitProgressLog()">Save Entry</button>
     </div>
+    <div style="height:30px"></div>
+  </div>
+
+  <!-- ============ FOOD LOG (free-text, AI-matched to food database) ============ -->
+  <div id="foodLogView" class="hidden">
+    <div class="topbar">
+      <button class="ghost" onclick="backFromFoodLogView()">‹ Back</button>
+      <div class="brand" style="font-size:15px" id="foodLogTitle"><span class="dot"></span> Food Log</div>
+    </div>
+    <div class="panel" style="margin-top:13px">
+      <h2>What did you eat?</h2>
+      <textarea class="fl-textarea" id="flText" placeholder="e.g. 2 eggs and a slice of toast for breakfast, and a banana"></textarea>
+      <div id="flError" class="auth-error hidden" style="margin-top:8px"></div>
+      <button class="prog-log-btn" id="flParseBtn" onclick="parseFoodLogText()">Parse & Log</button>
+    </div>
+
+    <div id="flReviewSection" class="hidden">
+      <h2 style="margin-top:18px">Confirm these items</h2>
+      <div id="flReviewList"></div>
+      <button class="newbtn" style="background:var(--good)" onclick="confirmAndSaveFoodLog()">✓ Confirm & Save</button>
+    </div>
+
+    <h2 style="margin-top:18px">Today's log</h2>
+    <div class="fl-totals-bar" id="flTotalsBar"></div>
+    <div id="flTodayList"></div>
     <div style="height:30px"></div>
   </div>
 
