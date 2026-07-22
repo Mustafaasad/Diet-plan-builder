@@ -252,8 +252,16 @@ const Store = {
     const kind=PREFIX_TO_KIND[prefix]||"diet";
     if(!currentUser) return false;
     if(currentProfile && currentProfile.role==="client"){
-      // client can only update the data on their own existing row, never touch ownership
-      const {error}=await sb.from("plans").update({data:obj,updated_at:new Date().toISOString()}).eq("id",obj.id);
+      // if a row already exists (trainer-assigned), only touch the data — never ownership.
+      // if no row exists yet (client generated/uploaded their own), create one owned by themselves.
+      const {data:existing}=await sb.from("plans").select("id").eq("id",obj.id).maybeSingle();
+      if(existing){
+        const {error}=await sb.from("plans").update({data:obj,updated_at:new Date().toISOString()}).eq("id",obj.id);
+        if(error){ console.error(error); return false; }
+        return true;
+      }
+      const row={ id:obj.id, kind, trainer_id:currentProfile.trainer_id||null, client_id:currentUser.id, data:obj, updated_at:new Date().toISOString() };
+      const {error}=await sb.from("plans").insert(row);
       if(error){ console.error(error); return false; }
       return true;
     }
@@ -973,6 +981,7 @@ function gotoClientHome(){
   document.getElementById("progressView").classList.add("hidden");
   document.getElementById("progressLogView").classList.add("hidden");
   document.getElementById("foodLogView").classList.add("hidden");
+  document.getElementById("photoWorkoutView").classList.add("hidden");
   document.getElementById("actionbar").classList.add("hidden");
   document.getElementById("wActionbar").classList.add("hidden");
   document.getElementById("rmAssignBar").classList.add("hidden");
@@ -992,6 +1001,7 @@ function gotoHome(){
   document.getElementById("progressView").classList.add("hidden");
   document.getElementById("progressLogView").classList.add("hidden");
   document.getElementById("foodLogView").classList.add("hidden");
+  document.getElementById("photoWorkoutView").classList.add("hidden");
   document.getElementById("homeView").classList.remove("hidden");
   document.getElementById("dietApp").classList.add("hidden");
   document.getElementById("workoutApp").classList.add("hidden");
@@ -1059,6 +1069,7 @@ async function openClientProfile(id,kind){
     document.getElementById("clientProfileTitle").innerHTML=`<span class="dot"></span> ${esc(c.full_name)||"Client"}`;
     document.getElementById("clientProfileProgressBtn").onclick=()=>openProgressView(kind,id,c.full_name);
     document.getElementById("clientProfileFoodLogBtn").onclick=()=>openFoodLogView(kind,id,c.full_name);
+    document.getElementById("clientProfilePhotoWorkoutBtn").onclick=()=>openPhotoWorkoutView(kind,id,c.full_name);
     if(!c.onboarding_completed||!c.onboarding){
       body.innerHTML=kind==="gym"
         ?'<div class="empty">No onboarding info yet for this client.</div>'
@@ -1490,6 +1501,107 @@ async function renderTodayFoodLog(){
   }catch(e){
     console.error("renderTodayFoodLog failed:",e);
     list.innerHTML='<div class="empty">Couldn\'t load today\'s log.</div>';
+  }
+}
+
+/* ====================== PHOTO → WORKOUT (AI-parsed via Edge Function) ====================== */
+let photoWorkoutCtx={kind:"online",id:null,trainerId:null,label:""};
+let photoWorkoutOpenedFromClientProfile=false;
+let pwSelectedFile=null;
+
+function openPhotoWorkoutView(kind,id,label){
+  photoWorkoutOpenedFromClientProfile = !(kind==="online" && id===null);
+  if(kind==="online" && id===null){
+    photoWorkoutCtx={kind:"online", id:currentUser.id, trainerId:currentProfile.trainer_id||null, label:currentProfile.full_name||"You"};
+  } else {
+    photoWorkoutCtx={kind, id, trainerId:currentUser.id, label:label||"Client"};
+  }
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("dietApp").classList.add("hidden");
+  document.getElementById("workoutApp").classList.add("hidden");
+  document.getElementById("clientHomeView").classList.add("hidden");
+  document.getElementById("clientsListView").classList.add("hidden");
+  document.getElementById("clientProfileView").classList.add("hidden");
+  document.getElementById("progressView").classList.add("hidden");
+  document.getElementById("foodLogView").classList.add("hidden");
+  document.getElementById("photoWorkoutView").classList.remove("hidden");
+  document.getElementById("photoWorkoutTitle").innerHTML=`<span class="dot"></span> ${esc(photoWorkoutCtx.label)}'s Photo → Workout`;
+  document.getElementById("pwPhotoInput").value="";
+  document.getElementById("pwPreviewWrap").innerHTML="";
+  document.getElementById("pwError").classList.add("hidden");
+  document.getElementById("pwParseBtn").disabled=true;
+  pwSelectedFile=null;
+  window.scrollTo(0,0);
+}
+function backFromPhotoWorkoutView(){
+  document.getElementById("photoWorkoutView").classList.add("hidden");
+  if(photoWorkoutOpenedFromClientProfile){
+    document.getElementById("clientProfileView").classList.remove("hidden");
+  } else {
+    document.getElementById("clientHomeView").classList.remove("hidden");
+  }
+}
+function handleWorkoutPhotoSelect(event){
+  const file=event.target.files&&event.target.files[0];
+  if(!file) return;
+  pwSelectedFile=file;
+  const url=URL.createObjectURL(file);
+  document.getElementById("pwPreviewWrap").innerHTML=`<img class="pw-preview" src="${url}">`;
+  document.getElementById("pwParseBtn").disabled=false;
+}
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result.split(",")[1]);
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function parseWorkoutPhoto(){
+  const errEl=document.getElementById("pwError");
+  if(!pwSelectedFile){ errEl.textContent="Choose a photo first"; errEl.classList.remove("hidden"); return; }
+  errEl.classList.add("hidden");
+  const btn=document.getElementById("pwParseBtn"); btn.disabled=true; btn.textContent="Parsing...";
+  try{
+    const imageBase64=await fileToBase64(pwSelectedFile);
+    const {data,error}=await sb.functions.invoke("parse-workout-photo",{
+      body:{ imageBase64, mimeType: pwSelectedFile.type||"image/jpeg", exerciseNames: EXERCISES.map(e=>e.name) }
+    });
+    if(error) throw error;
+    if(data.error) throw new Error(data.error);
+    const parsedExercises=(data.exercises||[]).map(e=>({
+      name:e.name||"", sets:e.sets||"", reps:e.reps||"", weight:e.weight||"", rest:e.rest||"",
+      notes:e.notes||"", ssGroup:null, ssType:null
+    }));
+    if(!parsedExercises.length){
+      errEl.textContent="Couldn't read any exercises from that photo — try a clearer shot";
+      errEl.classList.remove("hidden");
+      btn.disabled=false; btn.textContent="Parse Photo";
+      return;
+    }
+    const genWorkout={
+      id:"w"+Date.now()+Math.floor(Math.random()*999),
+      client: photoWorkoutCtx.label, goal:"", injury:"",
+      autoGenerated:true, source:"photo",
+      exercises: parsedExercises,
+      updated: Date.now()
+    };
+    if(photoWorkoutCtx.kind==="online") genWorkout.clientUserId=photoWorkoutCtx.id;
+
+    toast("Parsed! Review and save below");
+    document.getElementById("photoWorkoutView").classList.add("hidden");
+    document.getElementById("workoutApp").classList.remove("hidden");
+    document.getElementById("woHome").classList.add("hidden");
+    document.getElementById("rmSection").classList.add("hidden");
+    document.getElementById("customSection").classList.remove("hidden");
+    wPlan=genWorkout; wDirty=false;
+    wRenderEditor();
+    wShow("edit");
+  }catch(e){
+    console.error("parseWorkoutPhoto failed:",e);
+    errEl.textContent="Couldn't parse that photo — try again";
+    errEl.classList.remove("hidden");
+    btn.disabled=false; btn.textContent="Parse Photo";
   }
 }
 
