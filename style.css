@@ -1,10 +1,10 @@
   :root{
-    --ink:#0e2a33;--teal:#1f4e5f;--teal-2:#2f6c80;--mist:#eef3f4;--line:#d9e2e4;
-    --amber:#e8821e;--amber-soft:#fbe9d3;--amber-ink:#9a4e0c;--good:#2f8f5b;--over:#c0492f;
-    --paper:#f6f9f9;--white:#fff;
+    --ink:#0A0A0A;--teal:#0A0A0A;--teal-2:#5f5e5a;--mist:#F5F4F0;--line:#e2ded7;
+    --amber:#0A5CFF;--amber-soft:#E4EDFF;--amber-ink:#0A3C99;--good:#2f8f5b;--over:#c0492f;
+    --paper:#EFEEE8;--white:#fff;--font-display:Georgia,'Times New Roman',serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--paper);
+  body{font-family:Helvetica,Arial,sans-serif;background:var(--paper);
     color:var(--ink);line-height:1.45;font-size:15px}
   .wrap{max-width:560px;margin:0 auto;padding:14px 14px 110px}
   .hidden{display:none!important}
@@ -16,7 +16,7 @@
 
   .topbar{background:var(--teal);color:#fff;border-radius:16px;padding:15px 16px;
     box-shadow:0 6px 18px rgba(15,42,51,.16);display:flex;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:17px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:500;letter-spacing:.3px;font-size:17px;font-family:var(--font-display)}
   .dot{width:10px;height:10px;border-radius:50%;background:var(--amber);flex:none}
   .ghost{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:9px;padding:8px 12px;
     font-size:14px;font-weight:600;cursor:pointer}
@@ -28,9 +28,9 @@
   .plan-card{background:var(--white);border:1px solid var(--line);border-radius:13px;padding:13px 14px;
     margin-top:11px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
   .plan-card:active{background:#f0f6f7}
-  .plan-card .who{font-weight:700;font-size:16px}
+  .plan-card .who{font-weight:500;font-size:16px;font-family:var(--font-display)}
   .plan-card .meta{font-size:12px;color:#7e9197;margin-top:2px}
-  .plan-card .kcal{font-weight:800;color:var(--teal);font-size:15px;text-align:right;white-space:nowrap}
+  .plan-card .kcal{font-weight:500;font-family:var(--font-display);color:var(--teal);font-size:15px;text-align:right;white-space:nowrap}
   .plan-card .del{background:none;border:none;color:#b14;font-size:20px;cursor:pointer;padding:4px 2px 4px 10px}
   .empty{text-align:center;color:#90a3a8;padding:40px 10px;font-size:14px}
 
@@ -48,7 +48,7 @@
   .pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
   .pbox{background:var(--mist);border-radius:12px;padding:11px 12px}
   .pbox .name{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--teal-2);font-weight:600}
-  .pbox .used{font-size:20px;font-weight:800;margin-top:3px}
+  .pbox .used{font-size:20px;font-weight:500;font-family:var(--font-display);margin-top:3px}
   .pbox .used small{font-size:12px;font-weight:600;color:#7e9197}
   .bar{height:8px;background:#dde6e7;border-radius:5px;margin-top:8px;overflow:hidden}
   .bar>span{display:block;height:100%;background:var(--teal-2);border-radius:5px;transition:width .25s,background .25s}
