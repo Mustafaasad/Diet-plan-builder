@@ -517,8 +517,8 @@ const QUESTION_DEFS=[
   {key:"timeAvailable",label:"Time Available Per Session",type:"select",options:["Under 30 min","30–45 min","45–60 min","60+ min"]},
   {key:"equipment",label:"Equipment Available",type:"chips",options:OB_EQUIPMENT},
   {key:"dietaryRestrictions",label:"Dietary Restrictions",type:"chips",options:OB_DIET},
-  {key:"injury",label:"Injuries / Limitations",type:"textarea",placeholder:"Note any injuries, pain, or movements to avoid..."},
-  {key:"extra",label:"Anything Else Your Coach Should Know",type:"textarea",placeholder:"Anything we didn't ask that you think matters — schedule, past experience, preferences, concerns..."}
+  {key:"injury",label:"Injuries / Limitations",type:"textarea",locked:true,placeholder:"Note any injuries, pain, or movements to avoid..."},
+  {key:"extra",label:"Anything Else Your Coach Should Know",type:"textarea",locked:true,placeholder:"Anything we didn't ask that you think matters — schedule, past experience, preferences, concerns..."}
 ];
 const LOCKED_KEYS=QUESTION_DEFS.filter(q=>q.locked).map(q=>q.key);
 let obChipState={};
