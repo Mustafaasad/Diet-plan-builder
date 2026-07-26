@@ -2044,7 +2044,7 @@ async function savePlan(silent){
   if(!silent) toast(ok?"Plan saved":"Saved locally (this session)");
 }
 
-/* ====================== PDF SHELL (MUSCLE MATTERS BRAND) ====================== */
+/* ====================== PDF SHELL (ZBARG BRAND) ====================== */
 function mmPDFShell(title,subtitle,clientName,goal,dateStr,bodyHTML,footerNote){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -2055,21 +2055,21 @@ function mmPDFShell(title,subtitle,clientName,goal,dateStr,bodyHTML,footerNote){
   </style></head><body>
   <div style="max-width:760px;margin:0 auto;">
     <div style="background:#111;padding:20px 28px;text-align:center;">
-      <div style="font-size:20px;font-weight:900;letter-spacing:5px;text-transform:uppercase;color:#fff;">MUSCLE MATTERS</div>
+      <div style="font-size:20px;font-weight:900;letter-spacing:5px;text-transform:uppercase;color:#fff;">ZBARG</div>
       <div style="font-size:9px;letter-spacing:2.5px;opacity:.65;margin-top:5px;text-transform:uppercase;color:#fff;">${subtitle}</div>
     </div>
-    <div style="height:5px;background:#BB080B;"></div>
+    <div style="height:5px;background:#0A5CFF;"></div>
     <div style="padding:18px 28px 16px;background:#fff;border-bottom:1px solid #e8e4e0;display:flex;justify-content:space-between;align-items:flex-end;">
       <div>
         <div style="font-size:22px;font-weight:900;letter-spacing:.5px;">${clientName}</div>
-        ${goal?`<div style="display:inline-block;margin-top:8px;background:#BB080B;color:#fff;padding:3px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">${goal}</div>`:""}
+        ${goal?`<div style="display:inline-block;margin-top:8px;background:#0A5CFF;color:#fff;padding:3px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">${goal}</div>`:""}
       </div>
       <div style="font-size:11px;color:#999;font-weight:600;">${dateStr}</div>
     </div>
     ${bodyHTML}
     <div style="background:#F0EDE8;padding:13px 28px;display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
       <div style="font-size:10px;color:#888;letter-spacing:.3px;">${footerNote}</div>
-      <div style="font-size:9px;font-weight:900;letter-spacing:2.5px;color:#BB080B;">MUSCLE MATTERS</div>
+      <div style="font-size:9px;font-weight:900;letter-spacing:2.5px;color:#0A5CFF;">ZBARG</div>
     </div>
   </div>
   <script>document.fonts.ready.then(()=>{window.focus();window.print()});<\/script>
@@ -2096,16 +2096,16 @@ function exportPDF(){
     }).join("");
     return `<div style="margin:12px 24px 0">
       <div style="background:#111;color:#fff;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
-        <span style="display:inline-block;width:3px;height:16px;background:#BB080B;border-radius:2px;flex:none"></span>${esc(m.name)}</div>
+        <span style="display:inline-block;width:3px;height:16px;background:#0A5CFF;border-radius:2px;flex:none"></span>${esc(m.name)}</div>
       ${rows}
       <div style="padding:7px 16px;background:#F0EDE8;font-size:11px;text-align:right;color:#555;font-weight:700;border-top:1px solid #ddd;">
-        ${r1(t[0])}g P · ${r1(t[1])}g C · ${r1(t[2])}g F · <span style="color:#BB080B;font-weight:800">${r0(t[3])} kcal</span></div></div>`;
+        ${r1(t[0])}g P · ${r1(t[1])}g C · ${r1(t[2])}g F · <span style="color:#0A5CFF;font-weight:800">${r0(t[3])} kcal</span></div></div>`;
   }).join("");
 
   const tgt=plan.targets;
   const tgtLine=tgt[3]>0?` · Target: ${r0(tgt[3])} kcal`:"";
   const bodyHTML=`${mealsHTML}
-    <div style="margin:16px 24px 8px;background:#BB080B;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;">
+    <div style="margin:16px 24px 8px;background:#0A5CFF;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;">
       <span>DAY TOTAL${tgtLine}</span>
       <span>${r1(day[0])}P · ${r1(day[1])}C · ${r1(day[2])}F · ${r0(day[3])} kcal</span></div>`;
 
@@ -2715,8 +2715,8 @@ function rmExportPDF(){
   const date=new Date().toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"});
   const inj=rmPlan.injury||"";
 
-  const injHTML=inj?`<div style="margin:12px 24px;background:#fff5f5;border-left:4px solid #BB080B;padding:10px 14px;">
-    <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#BB080B;font-weight:800;margin-bottom:4px;">⚠ Injuries / Limitations</div>
+  const injHTML=inj?`<div style="margin:12px 24px;background:#fff5f5;border-left:4px solid #0A5CFF;padding:10px 14px;">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#0A5CFF;font-weight:800;margin-bottom:4px;">⚠ Injuries / Limitations</div>
     <div style="font-size:12.5px;color:#7b1717;">${esc(inj)}</div></div>`:"";
 
   const rmBar=`<div style="margin:10px 24px 0;padding:8px 14px;background:#F0EDE8;font-size:11px;color:#555;display:flex;gap:20px;flex-wrap:wrap;font-weight:600;">
@@ -2738,7 +2738,7 @@ function rmExportPDF(){
         <td style="padding:8px 14px;font-size:12.5px">${ex.warmup?'<span style="background:#fde;color:#9a4e0c;font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;margin-right:5px;letter-spacing:.5px">WARM-UP</span>':''}${esc(ex.name)}</td>
         <td style="padding:8px 6px;text-align:center;font-size:11.5px;color:#555;font-weight:600">${prescribed}<br><span style="color:#999;font-size:10px">Target: ${targetStr}</span></td>
         <td style="padding:8px 6px;text-align:center;font-size:12px">${esc(ex.rest)}</td>
-        <td style="padding:8px 14px;text-align:right;font-weight:800;font-size:13px;color:${loggedW!=="—"?"#BB080B":"#ccc"}">${loggedW}</td>
+        <td style="padding:8px 14px;text-align:right;font-weight:800;font-size:13px;color:${loggedW!=="—"?"#0A5CFF":"#ccc"}">${loggedW}</td>
       </tr>`;}).join("");
     const accRowsHTML=accs.map((a,ai)=>{
       const aLog=logs[`a${ai}`]||[];
@@ -2748,11 +2748,11 @@ function rmExportPDF(){
         <td style="padding:8px 14px;font-size:12px;color:#555">${esc(a.name)}</td>
         <td style="padding:8px 6px;text-align:center;font-size:11.5px;color:#888">${a.sets&&a.reps?a.sets+"×"+a.reps:""}</td>
         <td style="padding:8px 6px"></td>
-        <td style="padding:8px 14px;text-align:right;font-weight:700;font-size:12px;color:#BB080B">${loggedW}</td>
+        <td style="padding:8px 14px;text-align:right;font-weight:700;font-size:12px;color:#0A5CFF">${loggedW}</td>
       </tr>`;}).join("");
     return `<div style="margin:12px 24px 0">
       <div style="background:#111;color:#fff;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
-        <span style="display:inline-block;width:3px;height:16px;background:#BB080B;border-radius:2px;flex:none"></span>${esc(day.name)}</div>
+        <span style="display:inline-block;width:3px;height:16px;background:#0A5CFF;border-radius:2px;flex:none"></span>${esc(day.name)}</div>
       <table style="width:100%;border-collapse:collapse">
         <thead><tr style="background:#F0EDE8">
           <th style="padding:7px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#555;font-weight:700">Exercise</th>
@@ -2926,8 +2926,8 @@ function wExportPDF(){
   const injury=document.getElementById("wInjury").value.trim();
   const date=new Date().toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"});
 
-  const injuryHTML=injury?`<div style="margin:12px 24px;background:#fff5f5;border-left:4px solid #BB080B;padding:10px 14px;">
-    <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#BB080B;font-weight:800;margin-bottom:4px;">⚠ Injuries / Limitations</div>
+  const injuryHTML=injury?`<div style="margin:12px 24px;background:#fff5f5;border-left:4px solid #0A5CFF;padding:10px 14px;">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#0A5CFF;font-weight:800;margin-bottom:4px;">⚠ Injuries / Limitations</div>
     <div style="font-size:12.5px;color:#7b1717;">${esc(injury)}</div></div>`:"";
 
   const ssTypeLabel={superset:"SUPERSET",triset:"TRISET",giantset:"GIANT SET"};
@@ -2942,7 +2942,7 @@ function wExportPDF(){
       <td style="padding:9px 14px;font-size:12.5px;${lBorder}">${labelHTML}${esc(ex.name)}</td>
       <td style="padding:9px 8px;text-align:center;font-size:12.5px;font-weight:700">${esc(ex.sets)||"—"}</td>
       <td style="padding:9px 8px;text-align:center;font-size:12.5px;font-weight:700">${esc(ex.reps)||"—"}</td>
-      <td style="padding:9px 8px;text-align:center;font-size:12.5px;font-weight:700;color:#BB080B">${esc(ex.weight)?esc(ex.weight)+" kg":"—"}</td>
+      <td style="padding:9px 8px;text-align:center;font-size:12.5px;font-weight:700;color:#0A5CFF">${esc(ex.weight)?esc(ex.weight)+" kg":"—"}</td>
       <td style="padding:9px 8px;text-align:center;font-size:12px">${esc(ex.rest)||"—"}</td>
       <td style="padding:9px 14px;font-size:11.5px;color:#888">${esc(ex.notes)||""}</td>
     </tr>`;}).join("");
@@ -2950,7 +2950,7 @@ function wExportPDF(){
   const bodyHTML=`${injuryHTML}
     <div style="margin:14px 24px 0">
       <div style="background:#111;color:#fff;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
-        <span style="display:inline-block;width:3px;height:16px;background:#BB080B;border-radius:2px;flex:none"></span>EXERCISES
+        <span style="display:inline-block;width:3px;height:16px;background:#0A5CFF;border-radius:2px;flex:none"></span>EXERCISES
       </div>
       <table style="width:100%;border-collapse:collapse">
         <thead><tr style="background:#F0EDE8">
