@@ -414,9 +414,9 @@ async function checkSession(){
     document.getElementById("dietApp").classList.add("hidden");
     document.getElementById("workoutApp").classList.add("hidden");
     document.getElementById("clientHomeView").classList.remove("hidden");
-    document.getElementById("clientGreeting").textContent=profile.full_name?`Hi, ${profile.full_name}`:"My Plans";
+    document.getElementById("clientGreeting").textContent=profile.full_name?`Hi, ${profile.full_name}`:"Hi";
     renderClientTrainerLine();
-    renderClientPlans();
+    clientHomeNav("home");
   } else {
     document.getElementById("clientHomeView").classList.add("hidden");
     gotoHome();
@@ -868,6 +868,88 @@ async function renderClientPlans(){
   }).join("");
 }
 
+/* ====================== CLIENT DASHBOARD (Home tab) ====================== */
+const DASH_RING_CIRC=276.46;
+
+function clientHomeNav(tab){
+  const homeTab=document.getElementById("clientHomeTab");
+  const plansTab=document.getElementById("clientPlansTab");
+  const navHome=document.getElementById("navHomeBtn");
+  const navPlans=document.getElementById("navPlansBtn");
+  if(!homeTab||!plansTab) return;
+  if(tab==="plans"){
+    homeTab.classList.add("hidden"); plansTab.classList.remove("hidden");
+    navHome.classList.remove("active"); navPlans.classList.add("active");
+    renderClientPlans();
+  } else {
+    plansTab.classList.add("hidden"); homeTab.classList.remove("hidden");
+    navPlans.classList.remove("active"); navHome.classList.add("active");
+    renderClientDashboard();
+  }
+}
+
+function setDashPeriod(period){
+  if(period!=="today"){ toast("Weekly and monthly view is coming soon"); return; }
+  document.getElementById("dashPillToday").classList.add("active");
+  document.getElementById("dashPillWeekly").classList.remove("active");
+  document.getElementById("dashPillMonthly").classList.remove("active");
+}
+
+async function computeStreak(){
+  try{
+    const {data,error}=await sb.from("food_logs").select("logged_at")
+      .eq("client_kind","online").eq("client_id",currentUser.id)
+      .order("logged_at",{ascending:false});
+    if(error) throw error;
+    const days=[...new Set((data||[]).map(r=>r.logged_at))].sort((a,b)=>b.localeCompare(a));
+    if(!days.length) return 0;
+    const today=new Date(); today.setHours(0,0,0,0);
+    const mostRecent=new Date(days[0]);
+    if(Math.round((today-mostRecent)/86400000)>1) return 0;
+    let streak=1;
+    for(let i=1;i<days.length;i++){
+      const diff=Math.round((new Date(days[i-1])-new Date(days[i]))/86400000);
+      if(diff===1) streak++; else break;
+    }
+    return streak;
+  }catch(e){ console.error("computeStreak failed:",e); return 0; }
+}
+
+async function renderClientDashboard(){
+  try{
+    const diets=await Store.list("plan:");
+    const latestDiet=diets.sort((a,b)=>(b.updated||0)-(a.updated||0))[0];
+    const targets=(latestDiet&&latestDiet.targets)?latestDiet.targets:[0,0,0,0];
+
+    const today=new Date().toISOString().slice(0,10);
+    const {data,error}=await sb.from("food_logs").select("items")
+      .eq("client_kind","online").eq("client_id",currentUser.id).eq("logged_at",today);
+    if(error) throw error;
+    const allItems=(data||[]).flatMap(r=>r.items||[]);
+    const used=allItems.reduce((a,it)=>[a[0]+(it.p||0),a[1]+(it.c||0),a[2]+(it.fat||0),a[3]+(it.cal||0)],[0,0,0,0]);
+
+    const kcalUsed=used[3], kcalTarget=targets[3]||0;
+    const pct=kcalTarget>0?Math.min(1,kcalUsed/kcalTarget):0;
+    const arc=document.getElementById("dashRingArc");
+    if(arc) arc.setAttribute("stroke-dashoffset",(DASH_RING_CIRC*(1-pct)).toFixed(1));
+    const kcalEl=document.getElementById("dashRingKcal"); if(kcalEl) kcalEl.textContent=r0(kcalUsed);
+    const subEl=document.getElementById("dashRingSub"); if(subEl) subEl.textContent=kcalTarget?`of ${r0(kcalTarget)} kcal`:"no target set";
+
+    const macroDefs=[["ti-meat","Protein",0],["ti-wheat","Carbs",1],["ti-avocado","Fats",2]];
+    const macrosEl=document.getElementById("dashMacros");
+    if(macrosEl){
+      macrosEl.innerHTML=macroDefs.map(([icon,label,i])=>
+        `<div class="dash-macro-row"><span><i class="ti ${icon}"></i> ${label}</span><b>${r0(used[i])}/${r0(targets[i]||0)}g</b></div>`).join("");
+    }
+
+    const streak=await computeStreak();
+    const streakEl=document.getElementById("clientStreakLine");
+    if(streakEl) streakEl.innerHTML=streak>0?`<i class="ti ti-flame"></i> ${streak} day streak`:"";
+  }catch(e){
+    console.error("renderClientDashboard failed:",e);
+  }
+}
+
 async function clientOpenDiet(id){
   const all=await Store.list("plan:");
   plan=all.find(p=>p.id===id); if(!plan) return;
@@ -964,7 +1046,7 @@ async function renderLibrary(){
       </div>
       <div style="display:flex;align-items:center;">
         <div class="kcal">${r0(cal)}<br><span style="font-size:10px;font-weight:600;color:#90a3a8">kcal</span></div>
-        <button class="del" onclick="event.stopPropagation();deletePlan('${p.id}')">🗑</button>
+        <button class="del" onclick="event.stopPropagation();deletePlan('${p.id}')"><i class="ti ti-trash"></i></button>
       </div></div>`;
   }).join("");
 }
@@ -989,7 +1071,7 @@ function gotoClientHome(){
   document.getElementById("rmPlanBar").classList.add("hidden");
   document.getElementById("clientHomeView").classList.remove("hidden");
   renderClientTrainerLine();
-  renderClientPlans();
+  clientHomeNav("home");
   window.scrollTo(0,0);
 }
 function gotoHome(){
@@ -1810,7 +1892,7 @@ async function renderWoAllList(){
             <div class="meta">${esc(p.templateName)||""} · ${esc(p.templateTag)||""} · ${date}</div>
           </div>
           <div style="display:flex;align-items:center;">
-            <button class="del" onclick="event.stopPropagation();woAllDeletePlan('${p.id}','rm')">🗑</button>
+            <button class="del" onclick="event.stopPropagation();woAllDeletePlan('${p.id}','rm')"><i class="ti ti-trash"></i></button>
           </div></div>`;
       }
       const exCount=(p.exercises||[]).length;
@@ -1821,7 +1903,7 @@ async function renderWoAllList(){
           <div class="meta">${esc(p.goal)||"—"} · ${exCount} ex · ${date}</div>
         </div>
         <div style="display:flex;align-items:center;">
-          <button class="del" onclick="event.stopPropagation();woAllDeletePlan('${p.id}','custom')">🗑</button>
+          <button class="del" onclick="event.stopPropagation();woAllDeletePlan('${p.id}','custom')"><i class="ti ti-trash"></i></button>
         </div></div>`;
     }).join("");
   }catch(e){
@@ -1915,7 +1997,7 @@ function renderMeals(){
     return `<div class="meal">
       <div class="meal-head">
         <input value="${esc(m.name)}" onchange="setMealName(${mi},this.value)">
-        <button class="iconbtn" onclick="rmMeal(${mi})" title="delete meal">🗑</button></div>
+        <button class="iconbtn" onclick="rmMeal(${mi})" title="delete meal"><i class="ti ti-trash"></i></button></div>
       <div class="rows">${rows}<button class="add-food" onclick="addRow(${mi})">+ Add food</button></div>
       <div class="meal-sub" id="sub-${mi}"><span>${r1(t[0])}P</span><span>${r1(t[1])}C</span><span>${r1(t[2])}F</span><span>${r0(t[3])} kcal</span></div>
     </div>`;
@@ -2144,7 +2226,7 @@ async function rmRenderLibrary(){
       </div>
       <div style="display:flex;align-items:center;">
         <div class="kcal" style="font-size:11px;color:#7e9197;text-align:right">${esc(p.templateName)||""}</div>
-        <button class="del" onclick="event.stopPropagation();rmDeletePlan('${p.id}')">🗑</button>
+        <button class="del" onclick="event.stopPropagation();rmDeletePlan('${p.id}')"><i class="ti ti-trash"></i></button>
       </div></div>`).join("");
 }
 
@@ -2719,7 +2801,7 @@ async function wRenderLibrary(){
         </div>
         <div style="display:flex;align-items:center;">
           <div class="kcal" style="font-size:12px;color:#7e9197">${(p.exercises||[]).length} ex</div>
-          <button class="del" onclick="event.stopPropagation();wDeletePlan('${p.id}')">🗑</button>
+          <button class="del" onclick="event.stopPropagation();wDeletePlan('${p.id}')"><i class="ti ti-trash"></i></button>
         </div></div>`).join("");
   }catch(e){
     console.error("wRenderLibrary failed:",e);
