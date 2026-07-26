@@ -888,11 +888,13 @@ function clientHomeNav(tab){
   }
 }
 
+let dashPeriod="today";
 function setDashPeriod(period){
-  if(period!=="today"){ toast("Weekly and monthly view is coming soon"); return; }
-  document.getElementById("dashPillToday").classList.add("active");
-  document.getElementById("dashPillWeekly").classList.remove("active");
-  document.getElementById("dashPillMonthly").classList.remove("active");
+  dashPeriod=period;
+  document.getElementById("dashPillToday").classList.toggle("active",period==="today");
+  document.getElementById("dashPillWeekly").classList.toggle("active",period==="weekly");
+  document.getElementById("dashPillMonthly").classList.toggle("active",period==="monthly");
+  renderClientDashboard();
 }
 
 async function computeStreak(){
@@ -921,19 +923,32 @@ async function renderClientDashboard(){
     const latestDiet=diets.sort((a,b)=>(b.updated||0)-(a.updated||0))[0];
     const targets=(latestDiet&&latestDiet.targets)?latestDiet.targets:[0,0,0,0];
 
-    const today=new Date().toISOString().slice(0,10);
-    const {data,error}=await sb.from("food_logs").select("items")
-      .eq("client_kind","online").eq("client_id",currentUser.id).eq("logged_at",today);
+    const days=dashPeriod==="weekly"?7:(dashPeriod==="monthly"?30:1);
+    const todayStr=new Date().toISOString().slice(0,10);
+    let q=sb.from("food_logs").select("items").eq("client_kind","online").eq("client_id",currentUser.id);
+    if(days===1){
+      q=q.eq("logged_at",todayStr);
+    } else {
+      const start=new Date(); start.setDate(start.getDate()-(days-1));
+      q=q.gte("logged_at",start.toISOString().slice(0,10)).lte("logged_at",todayStr);
+    }
+    const {data,error}=await q;
     if(error) throw error;
     const allItems=(data||[]).flatMap(r=>r.items||[]);
-    const used=allItems.reduce((a,it)=>[a[0]+(it.p||0),a[1]+(it.c||0),a[2]+(it.fat||0),a[3]+(it.cal||0)],[0,0,0,0]);
+    const totals=allItems.reduce((a,it)=>[a[0]+(it.p||0),a[1]+(it.c||0),a[2]+(it.fat||0),a[3]+(it.cal||0)],[0,0,0,0]);
+    const used=days===1?totals:totals.map(v=>v/days);
 
     const kcalUsed=used[3], kcalTarget=targets[3]||0;
     const pct=kcalTarget>0?Math.min(1,kcalUsed/kcalTarget):0;
     const arc=document.getElementById("dashRingArc");
     if(arc) arc.setAttribute("stroke-dashoffset",(DASH_RING_CIRC*(1-pct)).toFixed(1));
     const kcalEl=document.getElementById("dashRingKcal"); if(kcalEl) kcalEl.textContent=r0(kcalUsed);
-    const subEl=document.getElementById("dashRingSub"); if(subEl) subEl.textContent=kcalTarget?`of ${r0(kcalTarget)} kcal`:"no target set";
+    const subEl=document.getElementById("dashRingSub");
+    if(subEl){
+      if(!kcalTarget) subEl.textContent="no target set";
+      else if(days===1) subEl.textContent=`of ${r0(kcalTarget)} kcal`;
+      else subEl.textContent=`avg/day · ${r0(kcalTarget)} kcal target`;
+    }
 
     const macroDefs=[["ti-meat","Protein",0],["ti-wheat","Carbs",1],["ti-avocado","Fats",2]];
     const macrosEl=document.getElementById("dashMacros");
