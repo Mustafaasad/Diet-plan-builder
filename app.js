@@ -1433,7 +1433,7 @@ async function downloadProgressReport(){
   const bodyHTML=`
     <div style="margin:16px 24px 0;text-align:center">${chartSVG}</div>
     <div style="margin:16px 24px 0">
-      <div style="background:#0A5CFF;color:#fff;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">MEASUREMENTS</div>
+      <div style="background:#E4EDFF;color:#0A3C99;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">MEASUREMENTS</div>
       <table style="width:100%;border-collapse:collapse">
         <thead><tr style="background:#F0EDE8">
           <th style="padding:7px 14px;text-align:left;font-size:10px;text-transform:uppercase;color:#555;font-weight:700">Metric</th>
@@ -2069,15 +2069,15 @@ function mmPDFShell(title,subtitle,clientName,goal,dateStr,bodyHTML,footerNote){
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   </style></head><body>
   <div style="max-width:760px;margin:0 auto;">
-    <div style="background:#0A0A0A;padding:20px 28px;text-align:center;">
-      <div style="font-size:20px;font-weight:900;letter-spacing:5px;text-transform:uppercase;color:#fff;">ZBARG</div>
-      <div style="font-size:9px;letter-spacing:2.5px;opacity:.65;margin-top:5px;text-transform:uppercase;color:#fff;">${subtitle}</div>
+    <div style="background:#E4EDFF;padding:20px 28px;text-align:center;">
+      <div style="font-size:20px;font-weight:900;letter-spacing:5px;text-transform:uppercase;color:#0A3C99;">ZBARG</div>
+      <div style="font-size:9px;letter-spacing:2.5px;opacity:.7;margin-top:5px;text-transform:uppercase;color:#0A3C99;">${subtitle}</div>
     </div>
     <div style="height:5px;background:#0A5CFF;"></div>
     <div style="padding:18px 28px 16px;background:#fff;border-bottom:1px solid #e8e4e0;display:flex;justify-content:space-between;align-items:flex-end;">
       <div>
         <div style="font-size:22px;font-weight:900;letter-spacing:.5px;">${clientName}</div>
-        ${goal?`<div style="display:inline-block;margin-top:8px;background:#0A5CFF;color:#fff;padding:3px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">${goal}</div>`:""}
+        ${goal?`<div style="display:inline-block;margin-top:8px;background:#E4EDFF;color:#0A3C99;padding:3px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">${goal}</div>`:""}
       </div>
       <div style="font-size:11px;color:#999;font-weight:600;">${dateStr}</div>
     </div>
@@ -2110,7 +2110,7 @@ function exportPDF(){
         <span style="font-weight:700;width:80px;text-align:right">${r0(mc[3])} kcal</span></div>`;
     }).join("");
     return `<div style="margin:12px 24px 0">
-      <div style="background:#0A5CFF;color:#fff;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
+      <div style="background:#E4EDFF;color:#0A3C99;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
         <span style="display:inline-block;width:3px;height:16px;background:#0A5CFF;border-radius:2px;flex:none"></span>${esc(m.name)}</div>
       ${rows}
       <div style="padding:7px 16px;background:#F0EDE8;font-size:11px;text-align:right;color:#555;font-weight:700;border-top:1px solid #ddd;">
@@ -2120,7 +2120,7 @@ function exportPDF(){
   const tgt=plan.targets;
   const tgtLine=tgt[3]>0?` · Target: ${r0(tgt[3])} kcal`:"";
   const bodyHTML=`${mealsHTML}
-    <div style="margin:16px 24px 8px;background:#0A5CFF;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;">
+    <div style="margin:16px 24px 8px;background:#E4EDFF;color:#0A3C99;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;">
       <span>DAY TOTAL${tgtLine}</span>
       <span>${r1(day[0])}P · ${r1(day[1])}C · ${r1(day[2])}F · ${r0(day[3])} kcal</span></div>`;
 
@@ -2766,7 +2766,7 @@ function rmExportPDF(){
         <td style="padding:8px 14px;text-align:right;font-weight:700;font-size:12px;color:#0A5CFF">${loggedW}</td>
       </tr>`;}).join("");
     return `<div style="margin:12px 24px 0">
-      <div style="background:#0A5CFF;color:#fff;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
+      <div style="background:#E4EDFF;color:#0A3C99;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
         <span style="display:inline-block;width:3px;height:16px;background:#0A5CFF;border-radius:2px;flex:none"></span>${esc(day.name)}</div>
       <table style="width:100%;border-collapse:collapse">
         <thead><tr style="background:#F0EDE8">
@@ -2780,7 +2780,7 @@ function rmExportPDF(){
   }).join("");
 
   const extraBadges=`<div style="display:inline-block;margin-left:8px;background:#F0EDE8;color:#555;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">${esc(tpl.tag)}</div>
-  <div style="display:inline-block;margin-left:6px;background:#0A5CFF;color:#fff;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px">WEEK ${rmActiveWeek+1} / ${tpl.weeks}</div>`;
+  <div style="display:inline-block;margin-left:6px;background:#E4EDFF;color:#0A3C99;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px">WEEK ${rmActiveWeek+1} / ${tpl.weeks}</div>`;
 
   const bodyHTML=`${injHTML}${rmBar}${daysHTML}<div style="height:12px"></div>`;
 
@@ -2964,7 +2964,7 @@ function wExportPDF(){
 
   const bodyHTML=`${injuryHTML}
     <div style="margin:14px 24px 0">
-      <div style="background:#0A5CFF;color:#fff;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
+      <div style="background:#E4EDFF;color:#0A3C99;padding:9px 16px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
         <span style="display:inline-block;width:3px;height:16px;background:#0A5CFF;border-radius:2px;flex:none"></span>EXERCISES
       </div>
       <table style="width:100%;border-collapse:collapse">
